@@ -1,0 +1,293 @@
+
+btn_Exbet.png
+size: 2048,1024
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+clip_exbet_click/clip_exbet_on_01
+  rotate: false
+  xy: 506, 328
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_02
+  rotate: false
+  xy: 758, 580
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_03
+  rotate: false
+  xy: 1010, 832
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_04
+  rotate: false
+  xy: 506, 150
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_05
+  rotate: false
+  xy: 1188, 832
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_06
+  rotate: false
+  xy: 1366, 832
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_07
+  rotate: false
+  xy: 1544, 832
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_08
+  rotate: false
+  xy: 1722, 832
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_09
+  rotate: false
+  xy: 684, 328
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_10
+  rotate: false
+  xy: 684, 150
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_11
+  rotate: false
+  xy: 936, 580
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_12
+  rotate: false
+  xy: 862, 402
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_13
+  rotate: false
+  xy: 862, 224
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_14
+  rotate: false
+  xy: 1114, 654
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_15
+  rotate: false
+  xy: 1292, 654
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_16
+  rotate: false
+  xy: 1470, 654
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_17
+  rotate: false
+  xy: 1648, 654
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_18
+  rotate: false
+  xy: 1040, 402
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_19
+  rotate: false
+  xy: 1040, 224
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_20
+  rotate: false
+  xy: 1218, 476
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_21
+  rotate: false
+  xy: 1218, 298
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_22
+  rotate: false
+  xy: 1396, 476
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_23
+  rotate: false
+  xy: 1396, 298
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_24
+  rotate: false
+  xy: 1574, 476
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_25
+  rotate: false
+  xy: 1574, 298
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_26
+  rotate: false
+  xy: 862, 46
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_27
+  rotate: false
+  xy: 1040, 46
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_28
+  rotate: false
+  xy: 1218, 120
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_29
+  rotate: false
+  xy: 1396, 120
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_click/clip_exbet_on_30
+  rotate: false
+  xy: 1574, 120
+  size: 176, 176
+  orig: 176, 176
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_1
+  rotate: false
+  xy: 2, 506
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_11
+  rotate: false
+  xy: 506, 758
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_13
+  rotate: false
+  xy: 2, 2
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_15
+  rotate: false
+  xy: 254, 254
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_17
+  rotate: false
+  xy: 506, 506
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_19
+  rotate: false
+  xy: 758, 758
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_20
+  rotate: false
+  xy: 254, 2
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_3
+  rotate: false
+  xy: 254, 758
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_5
+  rotate: false
+  xy: 2, 254
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_7
+  rotate: false
+  xy: 254, 506
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1
+clip_exbet_on/clip_exbet_click_9
+  rotate: false
+  xy: 2, 758
+  size: 250, 250
+  orig: 250, 250
+  offset: 0, 0
+  index: -1

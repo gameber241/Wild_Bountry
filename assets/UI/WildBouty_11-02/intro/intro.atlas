@@ -1,0 +1,48 @@
+
+intro.png
+size: 848,92
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Bullet
+  rotate: false
+  xy: 2, 50
+  size: 720, 40
+  orig: 720, 40
+  offset: 0, 0
+  index: -1
+hole
+  rotate: false
+  xy: 2, 22
+  size: 25, 26
+  orig: 25, 26
+  offset: 0, 0
+  index: -1
+par_1
+  rotate: false
+  xy: 29, 38
+  size: 13, 10
+  orig: 13, 10
+  offset: 0, 0
+  index: -1
+par_2
+  rotate: false
+  xy: 2, 6
+  size: 13, 14
+  orig: 13, 14
+  offset: 0, 0
+  index: -1
+par_3
+  rotate: false
+  xy: 17, 12
+  size: 9, 8
+  orig: 9, 8
+  offset: 0, 0
+  index: -1
+smoke_1
+  rotate: false
+  xy: 724, 2
+  size: 122, 88
+  orig: 122, 88
+  offset: 0, 0
+  index: -1
