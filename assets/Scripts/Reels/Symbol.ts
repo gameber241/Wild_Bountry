@@ -3,6 +3,7 @@ import { SymbolFrameState } from '../Enum/SymbolFrameState';
 import { ReelBase } from './ReelBase';
 import { SymbolType } from '../Enum/ESymbolFace';
 import { SymbolCell } from './SymbolCell';
+import { GameManager } from '../Manager/GameManager';
 
 
 const { ccclass, property, executeInEditMode } = _decorator;
@@ -262,7 +263,6 @@ export class Symbol extends Component {
 
                 if (this.face == SymbolType.SCRATCH || this.face == SymbolType.WILD) {
                     this.node.setSiblingIndex(90)
-                    // SoundToggle.instance.PlayScatchIdle()
                     const animNameAction = this.getNameAction();
                     const animNameIdle = this.getNameIdle()
                     this.icon.setCompleteListener((tracking) => {
@@ -315,9 +315,12 @@ export class Symbol extends Component {
         this.playiconAnimation(this.getNameWin(), false);
         this.scheduleOnce(() => {
             director.off("HIDE_INF", this.hideInf, this)
-
+            const idx = this.reel.listSymbol.findIndex(e => e === this);
+            if (idx !== -1) {
+                this.reel.listSymbol.splice(idx, 1);
+            }
             this.node.destroy();
-            // GameManager.instance.symBolArray[this.col][this.row] = null
+            GameManager.instance.symBolArray[this.col][this.row] = null
         }, 1);
 
 
