@@ -1,0 +1,187 @@
+{
+  "ver": "1.0.6",
+  "importer": "bitmap-font",
+  "imported": true,
+  "uuid": "e9f3d7a6-3ff1-4e68-b1eb-c8cf498f2e12",
+  "files": [
+    ".json"
+  ],
+  "subMetas": {},
+  "userData": {
+    "_fntConfig": {
+      "commonHeight": 324,
+      "fontSize": 32,
+      "atlasName": "num_multiple_red.png",
+      "fontDefDictionary": {
+        "9": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "xOffset": 0,
+          "yOffset": 0,
+          "xAdvance": 944
+        },
+        "32": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "xOffset": 0,
+          "yOffset": 0,
+          "xAdvance": 118
+        },
+        "44": {
+          "rect": {
+            "x": 403,
+            "y": 492,
+            "width": 74,
+            "height": 94
+          },
+          "xOffset": 0,
+          "yOffset": 70,
+          "xAdvance": 91
+        },
+        "46": {
+          "rect": {
+            "x": 202,
+            "y": 941,
+            "width": 68,
+            "height": 71
+          },
+          "xOffset": 0,
+          "yOffset": 70,
+          "xAdvance": 85
+        },
+        "48": {
+          "rect": {
+            "x": 0,
+            "y": 492,
+            "width": 201,
+            "height": 245
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 218
+        },
+        "49": {
+          "rect": {
+            "x": 397,
+            "y": 737,
+            "width": 121,
+            "height": 244
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 138
+        },
+        "50": {
+          "rect": {
+            "x": 391,
+            "y": 246,
+            "width": 182,
+            "height": 245
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 199
+        },
+        "51": {
+          "rect": {
+            "x": 203,
+            "y": 247,
+            "width": 187,
+            "height": 244
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 204
+        },
+        "52": {
+          "rect": {
+            "x": 202,
+            "y": 492,
+            "width": 200,
+            "height": 244
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 217
+        },
+        "53": {
+          "rect": {
+            "x": 0,
+            "y": 247,
+            "width": 202,
+            "height": 244
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 219
+        },
+        "54": {
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 207,
+            "height": 246
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 224
+        },
+        "55": {
+          "rect": {
+            "x": 400,
+            "y": 0,
+            "width": 173,
+            "height": 245
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 190
+        },
+        "56": {
+          "rect": {
+            "x": 208,
+            "y": 0,
+            "width": 191,
+            "height": 245
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 208
+        },
+        "57": {
+          "rect": {
+            "x": 0,
+            "y": 738,
+            "width": 201,
+            "height": 245
+          },
+          "xOffset": 0,
+          "yOffset": -100,
+          "xAdvance": 218
+        },
+        "88": {
+          "rect": {
+            "x": 202,
+            "y": 737,
+            "width": 194,
+            "height": 203
+          },
+          "xOffset": 0,
+          "yOffset": -60,
+          "xAdvance": 211
+        }
+      },
+      "kerningDict": {}
+    },
+    "fontSize": 32,
+    "textureUuid": "e968b71d-dcee-4cdb-974b-7a61136f20ef"
+  }
+}

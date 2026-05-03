@@ -8,21 +8,21 @@ export const sampleJson = {
 
     rounds: [{
         index: 0,
-        multiplier: 1,
+        multiplier: 8,
         isScratch: false,
         freeSpin: 0,
         totalPrice: 0,
         grid: [
             // Reel 0
             [
-                { i: 5, f: SymbolFrameState.GOLD },
-                { i: 5, f: SymbolFrameState.GOLD },
-                { i: 3, f: SymbolFrameState.GOLD },
+                { i: SymbolType.SCRATCH, f: SymbolFrameState.GOLD },
+                { i: 1, f: SymbolFrameState.GOLD },
+                { i: SymbolType.SCRATCH, f: SymbolFrameState.GOLD },
             ],
 
             // Reel 1 
             [
-                { i: 9, f: 0 },
+                { i: SymbolType.SCRATCH, f: 0 },
                 { i: 5, f: 0 },
                 { i: 3, f: 0 },
                 { i: 4, f: 0 },
@@ -30,7 +30,7 @@ export const sampleJson = {
 
             // Reel 2 
             [
-                { i: 7, f: 0 },
+                { i: SymbolType.SCRATCH, f: 0 },
                 { i: 8, f: 0 },
                 { i: 5, f: 0 },
                 { i: 7, f: 0 },
@@ -43,7 +43,7 @@ export const sampleJson = {
                 { i: 1, f: 0 },
                 { i: 7, f: 0 },
                 { i: 5, f: 0 },
-                { i: 4, f: 0 }
+                { i: SymbolType.SCRATCH, f: 0 }
             ],
 
             // Reel 4
@@ -64,7 +64,7 @@ export const sampleJson = {
         ],
 
         above: [
-            [{ i: 6, f: 0 },{ i: 7, f: 0 },],
+            [{ i: 6, f: 0 }, { i: 7, f: 0 },],
             [{ i: 6, f: 0 }],
             [{ i: 6, f: 0 }],
             [{ i: 6, f: 0 }],
@@ -73,8 +73,7 @@ export const sampleJson = {
 
         win: {
             positions: [
-                { c: 0, r: 0 },
-                { c: 0, r: 1 },
+
                 { c: 1, r: 1 },
                 { c: 2, r: 2 },
                 { c: 3, r: 3 },
@@ -83,12 +82,23 @@ export const sampleJson = {
 
             stepWin: 2000
         },
-        flips: [],
+        flips: [
+            {
+                from: { c: 0, r: 0 },
+                to: { i: SymbolType.WILD, f: SymbolFrameState.NORMAL }
+            },
+            {
+                from: { c: 0, r: 1 },
+                to: { i: SymbolType.WILD, f: SymbolFrameState.NORMAL }
+            },
+        ],
         copies: [],
         hasNext: false,
         total: 30,
-        comboNext: 3
-
+        stepWin: 300,
+        // BigWin: 80.8,
+        // SuperWin: 80.8,
+        // MegaWin: 80.8,
     }
     ]
 };

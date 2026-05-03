@@ -1,8 +1,0 @@
-retrigger_gain_light.webp
-size:123,104
-filter:Linear,Linear
-lightO5
-bounds:2,2,100,100
-par_1
-bounds:104,85,17,17
-offsets:2,2,20,20

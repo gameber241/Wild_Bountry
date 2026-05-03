@@ -6,11 +6,9 @@ const { ccclass, property } = _decorator;
 
 @ccclass('ReelBase')
 export abstract class ReelBase {
-    @property(Node)
-    maskEff: Node = null
     @property(sp.Skeleton)
     spinesEff: sp.Skeleton = null
-    protected symbolPadding = 1.5;
+    public symbolPadding = 1.5;
     public symbols: Symbol[] = [];
 
     protected cellSize = 0;
@@ -48,6 +46,7 @@ export abstract class ReelBase {
 
     protected collectSymbols() {
         this.symbols = [];
+        console.log(this.listSymbol)
         for (let n of this.listSymbol) {
             const s = n.getComponent(Symbol);
             if (s) {
@@ -82,7 +81,7 @@ export abstract class ReelBase {
             e.isInit = false
             e.node.active = true
         })
-        tween(this.reelNode)
+        tween(this.listSymbol[0])
             .call(() => {
                 if (this.isRolling === false) return;
                 for (let s of this.symbols) {
@@ -114,7 +113,7 @@ export abstract class ReelBase {
         this.isRolling = false;
         this._isStopping = true;
 
-        Tween.stopAllByTarget();
+        Tween.stopAllByTarget(this.listSymbol[0]);
 
         const total = this.symbols.length;
         const visible = this.VISIBLE_COUNT;
@@ -161,58 +160,139 @@ export abstract class ReelBase {
 
         this.startRoll();
     }
-    public cascadeDrop(dataAbove: any[]) {
+
+
+    // public cascadeDrop(dataAbove: any[]) {
+    //     const aboveData = this.isHorizontal() ? dataAbove : [...dataAbove].reverse();
+
+    //     this.symbols = this.symbols.filter(
+    //         s => s.node && s.node.isValid
+    //     );
+
+    //     let space = 0
+    //     let min = this.VISIBLE_COUNT
+    //     let max = min * 2 - 1
+
+    //     let listSymbok = []
+
+    //     for (let i = max; i >= min; i--) {
+    //         let s = this.symbols.find(e => e.reelIndex == i)
+    //         if (s == undefined || s == null) {
+    //             space++
+    //         }
+    //         else {
+    //             if (space > 0) {
+    //                 const oldRow = s.row;
+    //                 s.row += space
+    //                 s.reelIndex += space
+    //                 if (oldRow >= 0 && GameManager.instance.symBolArray[s.col][oldRow] === s) {
+    //                     GameManager.instance.symBolArray[s.col][oldRow] = null;
+    //                 }
+    //                 listSymbok.push(s)
+    //                 GameManager.instance.symBolArray[s.col][s.row] = s
+    //             }
+    //         }
+    //     }
+    //     const createCount = Math.min(space, aboveData.length)
+    //     for (let i = createCount - 1; i >= 0; i--) {
+    //         let Symbol = this.createNewSymbol()
+    //         this.symbols.push(Symbol)
+    //         Symbol.reelIndex = min + i
+    //         Symbol.node.setPosition(this.getSymbolPosition(Symbol.reelIndex - createCount))
+    //         Symbol.reel = this
+    //         Symbol.InitSymbol(aboveData[i]);
+    //         listSymbok.push(Symbol)
+    //         Symbol.col = this.possitionReel
+    //         Symbol.row = i
+    //         GameManager.instance.symBolArray[Symbol.col][Symbol.row] = Symbol
+    //     }
+
+    //     listSymbok.forEach((e, i) => {
+    //         GameManager.waitForSeconds(0.05)
+    //         e.DropToindex(0.1)
+    //     })
+
+    // }
+    public async cascadeDrop(dataAbove: any[]) {
         const aboveData = this.isHorizontal() ? dataAbove : [...dataAbove].reverse();
 
-        this.symbols = this.symbols.filter(
-            s => s.node && s.node.isValid
-        );
+        this.symbols = this.symbols.filter(s => s.node && s.node.isValid);
 
-        let space = 0
-        let min = this.VISIBLE_COUNT
-        let max = min * 2 - 1
+        let space = 0;
+        let min = this.VISIBLE_COUNT;
+        let max = min * 2 - 1;
 
-        let listSymbok = []
+        let existingSymbols: any[] = [];
+        let newSymbols: any[] = [];
 
+        // ======================
+        // 🔹 XỬ LÝ SYMBOL CŨ
+        // ======================
         for (let i = max; i >= min; i--) {
-            let s = this.symbols.find(e => e.reelIndex == i)
-            if (s == undefined || s == null) {
-                space++
-            }
-            else {
+            let s = this.symbols.find(e => e.reelIndex == i);
+
+            if (!s) {
+                space++;
+            } else {
                 if (space > 0) {
                     const oldRow = s.row;
-                    s.row += space
-                    s.reelIndex += space
+
+                    s.row += space;
+                    s.reelIndex += space;
+
                     if (oldRow >= 0 && GameManager.instance.symBolArray[s.col][oldRow] === s) {
                         GameManager.instance.symBolArray[s.col][oldRow] = null;
                     }
-                    listSymbok.push(s)
-                    GameManager.instance.symBolArray[s.col][s.row] = s
+
+                    existingSymbols.push(s);
+                    GameManager.instance.symBolArray[s.col][s.row] = s;
                 }
             }
         }
-        const createCount = Math.min(space, aboveData.length)
+
+        // ======================
+        // 🔹 TẠO SYMBOL MỚI
+        // ======================
+        const createCount = Math.min(space, aboveData.length);
+
         for (let i = createCount - 1; i >= 0; i--) {
-            let Symbol = this.createNewSymbol()
-            this.symbols.push(Symbol)
-            Symbol.reelIndex = min + i
-            Symbol.node.setPosition(this.getSymbolPosition(Symbol.reelIndex - createCount))
-            Symbol.reel = this
+            let Symbol = this.createNewSymbol();
+
+
+            Symbol.reelIndex = min + i;
+            Symbol.node.setPosition(this.getSymbolPosition(Symbol.reelIndex - createCount));
+
+            Symbol.reel = this;
             Symbol.InitSymbol(aboveData[i]);
-            listSymbok.push(Symbol)
-            Symbol.col = this.possitionReel
-            Symbol.row = i
-            GameManager.instance.symBolArray[Symbol.col][Symbol.row] = Symbol
+
+            Symbol.col = this.possitionReel;
+            Symbol.row = i;
+
+            GameManager.instance.symBolArray[Symbol.col][Symbol.row] = Symbol;
+
+            newSymbols.push(Symbol);
+        }
+        for (let i = 0; i < existingSymbols.length; i++) {
+            await GameManager.waitForSeconds(0.05);
+            existingSymbols[i].DropToindex(0.05);
         }
 
-        listSymbok.forEach((e, i) => {
-            GameManager.waitForSeconds(0.05)
-            e.DropToindex(0.1)
+        await GameManager.waitForSeconds(0.3);
+
+        this.symbols.forEach(e => {
+            e.shakeNode()
         })
+        // delay tổng sau khi symbol cũ rơi xong
+        await GameManager.waitForSeconds(0.3);
 
+        for (let i = 0; i < newSymbols.length; i++) {
+            this.symbols.push(newSymbols[i]);
+            this.listSymbol.push(newSymbols[i].node)
+
+            await GameManager.waitForSeconds(0.05);
+            newSymbols[i].DropToindex(0.05);
+        }
     }
-
 
     private createNewSymbol(): Symbol {
         let symbol = instantiate(PrefabManager.instance.symbolPrefab);

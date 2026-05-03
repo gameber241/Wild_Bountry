@@ -1,9 +1,13 @@
-import { _decorator, Component, Label, Node, Sprite, SpriteFrame, tween, UIOpacity, Vec3, director, resources, JsonAsset } from 'cc';
+import { _decorator, Component, Label, Node, Sprite, SpriteFrame, tween, UIOpacity, Vec3, director, resources, JsonAsset, Camera } from 'cc';
 import { ReelBase } from '../Reels/ReelBase';
 import { SymbolType } from '../Enum/ESymbolFace';
 import { Symbol } from '../Reels/Symbol';
 import { sampleJson } from '../DataExample';
 import { ListReel } from '../Reels/ListReel';
+import { Spin } from '../Game/Spin';
+import { MultiplierCarouselFinal } from '../Game/MultiplierAnimator';
+import { TextBoxGame } from '../Game/TextBoxGame';
+import { BigWin } from '../Game/BigWin';
 
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -30,6 +34,11 @@ export class GameManager extends Component {
     reels: ReelBase[] = []
     public static instance: GameManager = null
     public stoppedCount = 0
+
+    @property(Camera)
+    cameraMain: Camera = null;
+
+
 
     // @property(Label)
     // walet: Label = null
@@ -92,15 +101,23 @@ export class GameManager extends Component {
 
     //data Freespin
     dataFreespin = null
+    otherHeight = 0
+    AnimFirstGame() {
+        this.otherHeight = this.cameraMain.orthoHeight
+        this.cameraMain.orthoHeight = this.otherHeight + 150
+        tween(this.cameraMain)
+            .delay(0.5)
+            .to(1, { orthoHeight: this.otherHeight }).start()
+    }
 
 
     onLoad() {
+        this.AnimFirstGame()
         GameManager.instance = this
         // Listen to profile updates
         // EventBus.getInstance().on('profile:updated', this.onProfileUpdated, this);
     }
     protected start(): void {
-
         this.UpdatePrice()
         this.UpdatePriceWin
         this.SetNormal()
@@ -110,21 +127,14 @@ export class GameManager extends Component {
         // this.scheduleOnce(() => {
         //     const wsService = WebSocketService.getInstance();
         //     if (wsService) {
-        //         console.log('[GameManager] Requesting profile update after listener registration');
         //         wsService.getProfile();
         //     }
         // }, 0.1);
     }
 
     onProfileUpdated(payload: any): void {
-        // console.log('[GameManager] ===== PROFILE UPDATED EVENT =====');
-        // console.log('[GameManager] Received payload:', JSON.stringify(payload, null, 2));
-
         // const balance = this.extractBalanceFromPayload(payload);
-        // console.log('[GameManager] Extracted balance:', balance);
-
         // if (balance !== null) {
-        //     console.log('[GameManager] Updating UserInfo balance to:', balance);
         //     UserInfo.getInstance().updateBalance(balance);
         //     this.updateBalanceDisplay();
         // } else {
@@ -133,34 +143,26 @@ export class GameManager extends Component {
     }
 
     extractBalanceFromPayload(payload: any): number | null {
-        // console.log('[GameManager] extractBalanceFromPayload - payload:', JSON.stringify(payload, null, 2));
 
         if (!payload) {
-            console.log('[GameManager] Payload is null/undefined');
             return null;
         }
 
         const data = payload.data ? payload.data : payload;
-        // console.log('[GameManager] Extracted data:', JSON.stringify(data, null, 2));
-
         // Check wallets array first
         const wallets = Array.isArray(data.wallets) ? data.wallets : [];
-        // console.log('[GameManager] Wallets array:', wallets);
 
         if (wallets.length > 0 && wallets[0] && wallets[0].balance !== undefined) {
-            // console.log('[GameManager] Found balance in wallets[0]:', wallets[0].balance);
             return Number(wallets[0].balance);
         }
 
         // Check user.balance
         if (data.user && data.user.balance !== undefined) {
-            // console.log('[GameManager] Found balance in data.user:', data.user.balance);
             return Number(data.user.balance);
         }
 
         // Check direct balance
         if (data.balance !== undefined) {
-            console.log('[GameManager] Found direct balance:', data.balance);
             return Number(data.balance);
         }
 
@@ -297,12 +299,13 @@ export class GameManager extends Component {
 
     stepOld = 1
     SpinGame() {
+        MultiplierCarouselFinal.instance.resetCombo()
         this.sampleJson = sampleJson
         this.stepWinCurrent = 0
         this.UpdatePriceWin()
         // TextBoxCombo.instant.playRandomText()
         this.stepOld = 1
-        // Spin.instance.isSpin = true
+        Spin.instance.isSpin = true
         // Waymanager.instance.resetWay()
         const round = this.sampleJson.rounds[this.indexCurrentReel];
 
@@ -321,6 +324,7 @@ export class GameManager extends Component {
             this.RollDataNormal(grid)
         else {
             this.RollDataScratch(grid)
+
         }
     }
 
@@ -338,10 +342,8 @@ export class GameManager extends Component {
 
 
         let stopped = 0;
-        const phase1 = indexReel + 1;
+        const phase1 = indexReel + 1
         for (let i = 0; i <= indexReel; i++) {
-            let newRow = [...grid[i]];
-            console.log(newRow)
             this.reels[i].stopRoll(grid[i])
             await GameManager.waitForSeconds(this.GetTimeTurboScratchStart());
 
@@ -360,6 +362,7 @@ export class GameManager extends Component {
     }
 
     private async stopPhase2(index: number, grid: any[]) {
+        tween(this.cameraMain).to(1, { orthoHeight: this.otherHeight + 150 }).start()
         // Total.instance.setTextScratch()
         let current = index + 1;
 
@@ -389,7 +392,9 @@ export class GameManager extends Component {
         this.playAnimReelScratch(99);
         this.scheduleOnce(() => {
             this.ShowAllReef(true)
+
             this.scheduleOnce(() => {
+                tween(this.cameraMain).to(0.5, { orthoHeight: this.otherHeight }).start()
                 this.ClearData()
             }, 1)
 
@@ -446,42 +451,40 @@ export class GameManager extends Component {
     stepWinCurrent = 0
     async ClearData() {
         const r = this.sampleJson.rounds[this.indexCurrentReel];
-        console.log("Way", this.sampleJson, this.indexCurrentReel)
-
         if (r.win.positions.length > 0) {
+            ListReel.instance.ShowMaskEffect()
+
             // Waymanager.instance.animWay(r.win.ways)
-            // TextBoxCombo.instant.PlayStepWin(r.win.stepWin, this.stepOld)
+            ListReel.instance.maskEffect.active = true
             this.stepWinCurrent += r.win.stepWin
             this.UpdatePriceWin()
             this.removeWinDuplicateFlip(r)
             const flipPos = new Set(
                 r.flips.map(f => `${f.from.c}_${f.from.r}`)
             );
-            console.log('[ClearData] Flip positions:', Array.from(flipPos));
-
-            // dispose all win symbols except flip positions
             let disposeCount = 0;
             for (const e of r.win.positions) {
                 const key = `${e.c}_${e.r}`;
                 if (flipPos.has(key)) {
-                    console.log(`[ClearData] Skip dispose for flip position: ${key}`);
+
                     continue;
                 }
                 const symbol = this.resolveSymbolByPosition(e.c, e.r, e.i);
                 if (!symbol) {
-                    console.log(`[ClearData] Symbol not found at ${key}`);
                     continue;
                 }
-                console.log(`[ClearData] Disposing symbol at ${key}`);
+                await GameManager.waitForSeconds(0.05);
                 symbol.Dispose();
                 disposeCount++;
             }
-            console.log(`[ClearData] Total disposed: ${disposeCount} out of ${r.win.positions.length}`);
 
             // SoundToggle.instance.PlaySymbolWin()
             this.stepOld = this.sampleJson.rounds[this.indexCurrentReel].multiplier
-            // ComboManager.instance.ScrollToCombo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
+            MultiplierCarouselFinal.instance.focusToAsync(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
+            TextBoxGame.instant.PlayStepWin(r.win.stepWin, this.stepOld)
+
             await GameManager.waitForSeconds(1.1);
+            ListReel.instance.HideMaskEffect()
 
             if (r.flips.length > 0) {
                 this.FlipData();
@@ -500,7 +503,7 @@ export class GameManager extends Component {
                 }
             });
 
-            await GameManager.waitForSeconds(1);
+            await GameManager.waitForSeconds(2);
         }
         if (r.hasNext) {
             this.indexCurrentReel++;
@@ -536,18 +539,16 @@ export class GameManager extends Component {
                     this.PlayModeFreeSpin()
                 }
                 else {
-                    // this.indexCurrentReel = 0;
-
-                    // Spin.instance.ActiveSpin()
-                    // this.SetNormal();
+                    this.indexCurrentReel = 0;
+                    Spin.instance.ActiveSpin()
+                    this.SetNormal();
                     // SoundToggle.instance.playNormal()
-                    // if (Spin.instance.isAuto == true) {
-                    //     Spin.instance.AutoSpinNext()
-                    // }
-                    // else {
-                    //     Spin.instance.isSpin = false;
-                    // }
-
+                    if (Spin.instance.isAuto == true) {
+                        Spin.instance.AutoSpinNext()
+                    }
+                    else {
+                        Spin.instance.isSpin = false;
+                    }
                 }
 
             }
@@ -561,7 +562,7 @@ export class GameManager extends Component {
 
             winQueue.push(() => {
                 // SoundToggle.instance.playBigWin()
-                // BigWin.instance.showBigWin(runNext, r.BigWin);
+                BigWin.instance.showBigWin(runNext, r.BigWin);
             });
         }
 
@@ -569,15 +570,14 @@ export class GameManager extends Component {
 
             winQueue.push(() => {
                 // SoundToggle.instance.playBigWin()
-                // BigWin.instance.showSuperWin(runNext, r.SuperWin);
+                BigWin.instance.showSuperWin(runNext, r.SuperWin);
             });
         }
 
         if (r.MegaWin) {
-
             winQueue.push(() => {
                 // SoundToggle.instance.playBigWin()
-                // BigWin.instance.showMegaWin(runNext, r.MegaWin);
+                BigWin.instance.showMegaWin(runNext, r.MegaWin);
             });
         }
 
@@ -625,7 +625,7 @@ export class GameManager extends Component {
                     indexScratch++
                 }
             }
-            if (indexScratch >= 3) return i
+            if (indexScratch >= 2) return i
         }
     }
 
@@ -659,12 +659,12 @@ export class GameManager extends Component {
             if (i == index) {
                 if (e.spinesEff)
                     e.spinesEff.enabled = true
-                tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 0 }).start()
+                // tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 0 }).start()
             }
             else {
                 if (e.spinesEff)
                     e.spinesEff.enabled = false
-                tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 255 }).start()
+                // tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 255 }).start()
             }
         })
     }
@@ -678,7 +678,7 @@ export class GameManager extends Component {
                     s.playiconAnimation(s.getNameIdle(), true)
                 }
             })
-            tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 0 }).start()
+            // tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 0 }).start()
         })
     }
     isFree = false
@@ -712,35 +712,8 @@ export class GameManager extends Component {
 
 
     isShowSetting = false
-    public ShowSetting() {
-        // if (this.isShowSetting == true) return
-        // this.isShowSetting = true
-        // this.footer.setPosition(0, -550)
-        // tween(this.footer).to(0.2, { position: new Vec3(0, -880) })
-        //     .call(() => {
-        //         this.isShowSetting = false
-        //     })
-        //     .start()
-        // this.optionSetting.setPosition(0, -880)
-        // tween(this.optionSetting).to(0.2, { position: new Vec3(0, -550) }).start()
-    }
-    isShowFooter = false
-    public ShowFooter() {
-        // if (this.isShowFooter == true) return
-        // this.isShowFooter = true
-        // this.optionSetting.setPosition(0, -550)
-        // tween(this.optionSetting).to(0.2, { position: new Vec3(0, -880) })
-        //     .call(() => {
-        //         this.isShowFooter = false
-        //     })
-        //     .start()
-        // this.footer.setPosition(0, -880)
-        // tween(this.footer).to(0.2, { position: new Vec3(0, -550) }).start()
-    }
 
-    public ShowAuto() {
-        // this.UiAuto.show()
-    }
+    isShowFooter = false
 
     priceOffset = 2000
     priceMax = 20000
@@ -758,12 +731,6 @@ export class GameManager extends Component {
         // this.totalPrice.string = this.betCurrent.toString()
         // this.totalPriceBot.string = this.betCurrent.toString()
     }
-
-    @property(Node) history: Node = null
-    BtnHistory() {
-        // this.history.getComponent(H_story).show()
-    }
-
 
     static waitForSeconds(s: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, s * 1000));
@@ -842,8 +809,6 @@ export class GameManager extends Component {
 
     BtnCuoc() {
         this.DatCuocNode.active = true
-        console.log("den day")
-
     }
 
     onClickMap() {
@@ -869,12 +834,9 @@ export class GameManager extends Component {
         return this.totalFreeSpin
     }
     GetDataFreeSpin() {
-        console.log("den day", this.indexCurrentFreeSpin, this.dataFreespin.payload.batchSpins.length, this.totalFreeSpin)
         if (this.indexCurrentFreeSpin >= this.dataFreespin.payload.batchSpins.length) {
             return null
         }
-        console.log("den day", this.dataFreespin.payload.batchSpins[this.indexCurrentFreeSpin])
-
         return this.dataFreespin.payload.batchSpins[this.indexCurrentFreeSpin]
     }
 

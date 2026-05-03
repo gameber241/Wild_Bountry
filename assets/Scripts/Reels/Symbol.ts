@@ -128,7 +128,7 @@ export class Symbol extends Component {
 
     playFrameAnimation(name: string, loop: boolean) {
         if (this.frameState == SymbolFrameState.GOLD) {
-            this.frame.setSkin("Border_Gold")
+            this.frame.setSkin("Gold_Frame")
         }
         this.frame?.setAnimation(0, name, loop);
 
@@ -136,6 +136,7 @@ export class Symbol extends Component {
 
     UpdateFrame() {
         if (this.frameState == SymbolFrameState.GOLD) {
+            console.log("den day")
             this.frame.enabled = true
             this.playFrameAnimation(this.getNameIdle(), true);
 
@@ -159,7 +160,7 @@ export class Symbol extends Component {
     }
 
     InitSymbol(data: SymbolCell) {
-
+        console.log(data)
         this.isInit = true;
         this.face = data.i;
         this.frameState = data.f;
@@ -254,32 +255,13 @@ export class Symbol extends Component {
             .to(0.08, { position: upPos }, { easing: 'sineOut' })
             .to(0.08, { position: basePos }, { easing: 'sineIn' })
             .call(() => {
-                if (this.isInit == true) {
-
-                }
-                else {
+                if (this.isInit == false) {
                     this.node.active = false
                 }
-
+                const animNameIdle = this.getNameIdle()
+                this.playiconAnimation(animNameIdle, true)
                 if (this.face == SymbolType.SCRATCH || this.face == SymbolType.WILD) {
                     this.node.setSiblingIndex(90)
-                    const animNameAction = this.getNameAction();
-                    const animNameIdle = this.getNameIdle()
-                    this.icon.setCompleteListener((tracking) => {
-                        if (tracking.animation.name != animNameIdle) return
-                        this.icon.setCompleteListener(null);
-                    });
-                    this.playiconAnimation(animNameAction, true)
-                    this.addAnimation(animNameIdle, true)
-
-                }
-                else {
-                    const animNameIdle = this.getNameIdle()
-                    this.icon.setCompleteListener((tracking) => {
-                        if (tracking.animation.name != animNameIdle) return
-                        this.icon.setCompleteListener(null);
-                    });
-                    this.playiconAnimation(animNameIdle, true)
                 }
             })
             .start();
@@ -297,25 +279,28 @@ export class Symbol extends Component {
             this.node.position.z
         );
     }
-    FlipSymbol(data, onComplete?: () => void) {
+    FlipSymbol(data) {
         this.AnimationWin()
         this.isInit = true;
         this.face = data.i;
         this.frameState = data.f;
-
-        this.icon.setCompleteListener(() => {
-            this.icon.setCompleteListener(null);
-            this.UpdateFrame();
-            this.addAnimation(this.getNameIdle(), true);
-
-        });
+        this.UpdateFrame();
+        tween(this.icon.node)
+            .to(0.1, { scale: new Vec3(0, 0, 0) })
+            .call(() => {
+                this.playiconAnimation(this.getNameIdle(), true);
+            })
+            .to(0.1, { scale: new Vec3(1, 1, 1) })
+            .start()
     }
 
     Dispose() {
+        this.node.setSiblingIndex(100)
         this.playiconAnimation(this.getNameWin(), false);
         this.scheduleOnce(() => {
             director.off("HIDE_INF", this.hideInf, this)
-            const idx = this.reel.listSymbol.findIndex(e => e === this);
+            const idx = this.reel.listSymbol.findIndex(e => e === this.node);
+            console.log(this.reel.listSymbol, idx)
             if (idx !== -1) {
                 this.reel.listSymbol.splice(idx, 1);
             }
@@ -454,5 +439,21 @@ export class Symbol extends Component {
 
         // this.frameInf.setAnimation(0, this.getNameIdle(), true)
 
+    }
+
+
+    public shakeNode() {
+        const originalPos = this.node.position.clone();
+
+        const offset = 10; // độ lệch (px)
+        const duration = 0.05;
+
+        tween(this.node)
+            .to(duration, { position: new Vec3(originalPos.x - offset, originalPos.y, 0) })
+            .to(duration, { position: new Vec3(originalPos.x + offset, originalPos.y, 0) })
+            .to(duration, { position: new Vec3(originalPos.x - offset, originalPos.y, 0) })
+            .to(duration, { position: new Vec3(originalPos.x + offset, originalPos.y, 0) })
+            .to(duration, { position: originalPos }) // về vị trí cũ
+            .start();
     }
 }

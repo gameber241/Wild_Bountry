@@ -96,33 +96,33 @@ export class Spin extends Component {
     isMove = false
 
     MouseEnter() {
-        if (this.isMove) return
-        this.isMove = true
+        // if (this.isMove) return
+        // this.isMove = true
 
-        if (this.isAuto == true) {
-            this.skeletonSpin.setAnimation(0, "auto_touch", true)
-        }
-        else {
-            if (this.isIdle == false) {
-                this.skeletonSpin.setAnimation(0, "idle_touch", true)
+        // if (this.isAuto == true) {
+        //     this.skeletonSpin.setAnimation(0, "auto_touch", true)
+        // }
+        // else {
+        //     if (this.isIdle == false) {
+        //         this.skeletonSpin.setAnimation(0, "idle_touch", true)
 
-            }
-        }
+        //     }
+        // }
     }
 
 
 
     MoveLeave() {
-        this.isMove = false
-        if (this.isAuto == true) {
-            this.skeletonSpin.setAnimation(0, "auto_idle", true)
-        }
-        else {
-            if (this.isIdle == false) {
-                this.skeletonSpin.setAnimation(0, "idle", true)
+        // this.isMove = false
+        // if (this.isAuto == true) {
+        //     this.skeletonSpin.setAnimation(0, "auto_idle", true)
+        // }
+        // else {
+        //     if (this.isIdle == false) {
+        //         this.skeletonSpin.setAnimation(0, "idle", true)
 
-            }
-        }
+        //     }
+        // }
     }
 
 }
