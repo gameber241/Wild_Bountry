@@ -2,12 +2,13 @@ import { _decorator, Component, Label, Node, Sprite, SpriteFrame, tween, UIOpaci
 import { ReelBase } from '../Reels/ReelBase';
 import { SymbolType } from '../Enum/ESymbolFace';
 import { Symbol } from '../Reels/Symbol';
-import { sampleJson } from '../DataExample';
+import { dataSpin, sampleJson } from '../DataExample';
 import { ListReel } from '../Reels/ListReel';
 import { Spin } from '../Game/Spin';
 import { MultiplierCarouselFinal } from '../Game/MultiplierAnimator';
 import { TextBoxGame } from '../Game/TextBoxGame';
 import { BigWin } from '../Game/BigWin';
+import { FreeSpines } from '../Game/FreeSpines';
 
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -100,7 +101,7 @@ export class GameManager extends Component {
 
 
     //data Freespin
-    dataFreespin = null
+    dataFreespin = dataSpin
     otherHeight = 0
     AnimFirstGame() {
         this.otherHeight = this.cameraMain.orthoHeight
@@ -362,43 +363,43 @@ export class GameManager extends Component {
     }
 
     private async stopPhase2(index: number, grid: any[]) {
-        tween(this.cameraMain).to(1, { orthoHeight: this.otherHeight + 150 }).start()
-        // Total.instance.setTextScratch()
-        let current = index + 1;
+        tween(this.cameraMain).to(1, { orthoHeight: this.otherHeight + 150 })
+            .call(async () => {
+                TextBoxGame.instant.playScratch()
+                let current = index + 1;
 
-        while (current < this.reels.length) {
-            const reel = this.reels[current];
-            reel.changeSpeed(0.07)
-            // play animation scratch cho reel hiện tại
-            this.playAnimReelScratch(current);
-            // play idle scratch cho symbol
-            reel.symbols.forEach(e => {
-                if (e.face === SymbolType.SCRATCH) {
-                    // e.PlayIdleScratch();
+                while (current < this.reels.length) {
+                    const reel = this.reels[current];
+                    reel.changeSpeed(0.1)
+                    ListReel.instance.ShowMaskEffect()
+                    this.ShowAllScratch(current)
+                    reel.ShowAllSymbol()
+                    ListReel.instance.ShowVfxLight(current)
+                    await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
+                    reel.stopRoll(grid[current]);
+                    reel._delay = 0.06
+                    ListReel.instance.HideVfxLight()
+                    await GameManager.waitForSeconds(0.5);
+                    reel.HideSymbolDifScratch()
+                    current++;
                 }
-            });
 
-            // đợi 4s
-            await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
+                // Khi stop hết reel
+                // this.playAnimReelScratch(99);
+                this.scheduleOnce(() => {
+                    this.ShowAllReef(true)
+                    this.scheduleOnce(() => {
+                        tween(this.cameraMain).to(0.5, { orthoHeight: this.otherHeight })
+                            .call(() => {
+                                this.ClearData()
+                            })
+                            .start()
+                    }, 1)
 
-            // stop reel
-            reel.stopRoll(grid[current]);
-            reel._delay = 0.04
+                }, 0.4)
+            })
+            .start()
 
-            current++;
-        }
-
-        // Khi stop hết reel
-        this.playAnimReelScratch(99);
-        this.scheduleOnce(() => {
-            this.ShowAllReef(true)
-
-            this.scheduleOnce(() => {
-                tween(this.cameraMain).to(0.5, { orthoHeight: this.otherHeight }).start()
-                this.ClearData()
-            }, 1)
-
-        }, 0.4)
     }
 
     async RollDataNormal(grid) {
@@ -480,7 +481,7 @@ export class GameManager extends Component {
 
             // SoundToggle.instance.PlaySymbolWin()
             this.stepOld = this.sampleJson.rounds[this.indexCurrentReel].multiplier
-            MultiplierCarouselFinal.instance.focusToAsync(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
+            MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
             TextBoxGame.instant.PlayStepWin(r.win.stepWin, this.stepOld)
 
             await GameManager.waitForSeconds(1.1);
@@ -531,7 +532,7 @@ export class GameManager extends Component {
             if (this.CheckScratch4() == true) {
                 this.indexCurrentReel = 0
                 this.isFreeSpin = true
-                // FreeSpines.instance.playAnimation(this.getFreeSpin(this.GetNumberScratch()));
+                FreeSpines.instance.playAnimation(this.getFreeSpin(this.GetNumberScratch()));
             }
             else {
                 if (this.isFreeSpin == true) {
@@ -764,7 +765,7 @@ export class GameManager extends Component {
     GetTimeTurboScratchSpin() {
         if (this.turboMode == 0) {
             // SoundToggle.instance.PlayRollScatch()
-            return 4
+            return 2
         }
         if (this.turboMode == 1) {
             return 0
@@ -874,6 +875,20 @@ export class GameManager extends Component {
         // const grid = this.sampleJson.rounds[this.indexCurrentReel].grid;
         // FreeSpines.instance.UpdateFreeSpinLb(this.totalFreeSpin)
         // this.GenerateMap(grid);
+    }
+
+
+    ShowAllScratch(index) {
+        this.reels.forEach((r, indexReel) => {
+            if (indexReel < index) {
+                r.symbols.forEach(e => {
+                    if (e.face == SymbolType.SCRATCH) {
+                        e.node.setSiblingIndex(99)
+                    }
+                })
+            }
+
+        })
     }
 }
 

@@ -6,8 +6,13 @@ const { ccclass, property } = _decorator;
 @ccclass('Spin')
 export class Spin extends Component {
     @property(sp.Skeleton)
-    skeletonSpin: sp.Skeleton = null
+    animSpinPlay: sp.Skeleton = null
 
+    @property(sp.Skeleton)
+    animBg: sp.Skeleton = null
+
+    @property(sp.Skeleton)
+    animRotate: sp.Skeleton = null
     public static instance: Spin
 
     protected onLoad(): void {
@@ -18,6 +23,8 @@ export class Spin extends Component {
         this.node.on(Node.EventType.MOUSE_ENTER, this.MouseEnter, this)
         this.node.on(Node.EventType.MOUSE_LEAVE, this.MoveLeave, this)
         this.node.on(Input.EventType.TOUCH_END, this.TouchEnd, this)
+
+        this.PlayIdle()
     }
 
     // ================= NORMAL SPIN =================
@@ -34,17 +41,67 @@ export class Spin extends Component {
         this.StartSpin()
     }
 
+    PlayIdle() {
+        this.animRotate.node.active = true
+        this.animSpinPlay.node.active = false
+        this.animBg.node.active = true
+
+        this.animBg.setAnimation(0, "idle", true)
+        // this.animRotate.setAnimation(0, "idle_rotate", true)
+
+    }
+
+    PlayIdleHover() {
+        this.animRotate.node.active = true
+        this.animSpinPlay.node.active = false
+        this.animBg.node.active = true
+
+        this.animBg.setAnimation(0, "idle_touch", true)
+        // this.animRotate.setAnimation(0, "idle_rotate", true)
+
+    }
+
+
+    PlayIdleAuto() {
+        this.animRotate.node.active = true
+        this.animSpinPlay.node.active = false
+        this.animBg.node.active = true
+
+        this.animBg.setAnimation(0, "auto_idle", true)
+        // this.animRotate.setAnimation(0, "idle_rotate", true)
+
+    }
+
+    PlayIdleHoverAuto() {
+        this.animRotate.node.active = true
+        this.animSpinPlay.node.active = false
+        this.animBg.node.active = true
+
+        this.animBg.setAnimation(0, "auto_touch", true)
+        // this.animRotate.setAnimation(0, "idle_rotate", true)
+
+    }
+
     StartSpin() {
         this.isSpin = true
         // SoundToggle.instance.PlaySpin()
         this.isIdle = true
-        this.skeletonSpin.setAnimation(0, "action_start", false)
-        this.skeletonSpin.addAnimation(0, "action_loop", false)
-        this.skeletonSpin.addAnimation(0, "idle", true)
+        this.animRotate.node.active = false
+        this.animSpinPlay.node.active = true
+        this.animBg.node.active = true
+        this.animSpinPlay.setAnimation(0, "action_start", false)
+        // this.animSpinPlay.addAnimation(0, "action_loop", false)
+        // this.animSpinPlay.addAnimation(0, "idle", true)
 
-        this.skeletonSpin.setCompleteListener((tracking) => {
-            if (tracking.animation.name == "idle") {
+        this.animSpinPlay.setCompleteListener((tracking) => {
+            if (tracking.animation.name == "action_start") {
                 this.isIdle = false
+                if (this.isAuto) {
+                    this.PlayIdleAuto()
+                }
+                else {
+                    this.PlayIdle()
+                }
             }
         })
         GameManager.instance.PlaySpin()
@@ -71,7 +128,7 @@ export class Spin extends Component {
         this.isAuto = true
         this.autoCount = number
         // this.skeletonSpin.node.active = false
-        this.skeletonSpin.setAnimation(0, "auto_idle")
+        this.animSpinPlay.setAnimation(0, "auto_idle")
         this.StartSpin()
     }
 
@@ -87,8 +144,8 @@ export class Spin extends Component {
 
     StopAuto() {
         this.isAuto = false
-        this.skeletonSpin.node.active = true
-        this.skeletonSpin.setAnimation(0, "idle", true)
+        this.animSpinPlay.node.active = true
+        this.animSpinPlay.setAnimation(0, "idle", true)
     }
 
     // ================= FX =================
@@ -96,33 +153,31 @@ export class Spin extends Component {
     isMove = false
 
     MouseEnter() {
-        // if (this.isMove) return
-        // this.isMove = true
+        if (this.isMove) return
+        this.isMove = true
 
-        // if (this.isAuto == true) {
-        //     this.skeletonSpin.setAnimation(0, "auto_touch", true)
-        // }
-        // else {
-        //     if (this.isIdle == false) {
-        //         this.skeletonSpin.setAnimation(0, "idle_touch", true)
-
-        //     }
-        // }
+        if (this.isAuto == true) {
+            this.PlayIdleHoverAuto()
+        }
+        else {
+            if (this.isIdle == false) {
+                this.PlayIdleHover()
+            }
+        }
     }
 
 
 
     MoveLeave() {
-        // this.isMove = false
-        // if (this.isAuto == true) {
-        //     this.skeletonSpin.setAnimation(0, "auto_idle", true)
-        // }
-        // else {
-        //     if (this.isIdle == false) {
-        //         this.skeletonSpin.setAnimation(0, "idle", true)
-
-        //     }
-        // }
+        this.isMove = false
+        if (this.isAuto == true) {
+            this.PlayIdleAuto()
+        }
+        else {
+            if (this.isIdle == false) {
+                this.PlayIdle()
+            }
+        }
     }
 
 }

@@ -2,7 +2,7 @@ import { _decorator, Component, Node, Prefab, instantiate, Vec3, tween, Label, U
 const { ccclass, property } = _decorator;
 
 // ===== MODE =====
-enum MultiplierMode {
+export enum MultiplierMode {
     NORMAL = 0,
     SPECIAL = 1
 }
@@ -23,7 +23,6 @@ export class MultiplierCarouselFinal extends Component {
     @property
     maxValue: number = 1024;
 
-    @property({ type: MultiplierMode })
     mode: MultiplierMode = MultiplierMode.NORMAL;
 
     @property([Font])
@@ -255,13 +254,16 @@ export class MultiplierCarouselFinal extends Component {
     }
 
     public switchToScratchMode() {
-        tween(this.node).to(1, { position: new Vec3(0, 430) }, { easing: "backInOut" })
+
+        tween(this.node)
+            .to(1, { position: new Vec3(0, 430) }, { easing: "backInOut" })
             .call(() => {
+
                 const TARGET = 8;
 
-                // 👉 nếu đã ở 8 rồi
+                // ✅ FIX: nếu đã ở 8
                 if (this.currentCenter === TARGET) {
-                    this.mode = MultiplierMode.SPECIAL; // ✅ FIX: set mode
+                    this.mode = MultiplierMode.SPECIAL;
                     this.applyScratchLayout();
                     return;
                 }
@@ -269,7 +271,6 @@ export class MultiplierCarouselFinal extends Component {
                 const steps: number[] = [];
                 let temp = this.currentCenter;
 
-                // 👉 build path theo mode hiện tại (thường là NORMAL)
                 while (temp !== TARGET) {
                     temp = temp * 2;
 
@@ -282,29 +283,31 @@ export class MultiplierCarouselFinal extends Component {
 
                 let delay = 0;
 
-                steps.forEach((value, index) => {
+                steps.forEach((_, index) => {
+
                     this.scheduleOnce(() => {
-                        this.next()
+
+                        this.next();
+
                         // 👉 bước cuối
                         if (index === steps.length - 1) {
+
                             this.scheduleOnce(() => {
-                                // ✅ QUAN TRỌNG: đổi mode tại đây
                                 this.mode = MultiplierMode.SPECIAL;
-                                tween(this.node)
-                                    .delay(0.5)
-                                    .to(1, { position: new Vec3(0, 782.674) }, { easing: "backInOut" }).start()
                                 this.applyScratchLayout();
-                                this
-                            }, 0.5);
+                                // 👉 move UI về lại
+
+
+                            }, 0.4); // ✅ >= tween 0.35
                         }
 
                     }, delay);
 
-                    delay += 0.15;
+                    delay += 0.4; // ✅ đồng bộ tween
                 });
-            })
-            .start()
 
+            })
+            .start();
     }
 
     private applyScratchLayout() {
@@ -321,5 +324,9 @@ export class MultiplierCarouselFinal extends Component {
             this.setValue(this.nodes[i], values[i]);
             this.setState(this.nodes[i], i, false, values[i]);
         }
+
+        tween(this.node)
+            .to(1, { position: new Vec3(0, 782.674) }, { easing: "backInOut" })
+            .start();
     }
 }

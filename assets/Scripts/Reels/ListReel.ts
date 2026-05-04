@@ -1,4 +1,4 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node, tween, UIOpacity } from 'cc';
 import { ReelVertical } from './ReelVertical';
 const { ccclass, property } = _decorator;
 
@@ -12,6 +12,9 @@ export class ListReel extends Component {
 
     @property(Node)
     maskEffect: Node = null;
+
+    @property(Node)
+    vfxLight: Node = null
 
 
     protected onLoad(): void {
@@ -77,15 +80,63 @@ export class ListReel extends Component {
         }
     }
 
+
+    ShowVfxLight(indexReel) {
+        let posX = 0
+        switch (indexReel) {
+            case 0:
+                posX = -296
+                break;
+            case 1:
+                posX = -177
+                break;
+            case 2:
+                posX = -58
+                break;
+            case 3:
+                posX = 58
+                break;
+            case 4:
+                posX = 177
+                break;
+            case 5:
+                posX = 296
+                break;
+        }
+        let opacity = this.vfxLight.getComponent(UIOpacity)
+        opacity.opacity = 0;
+        this.vfxLight.active = true
+        this.vfxLight.setPosition(posX, -32, 0)
+
+        tween(opacity).to(0.5, { opacity: 255 }).start()
+    }
+    HideVfxLight() {
+        let opacity = this.vfxLight.getComponent(UIOpacity)
+        opacity.opacity = 255
+        tween(opacity).to(0.5, { opacity: 0 })
+            .call(() => {
+                this.vfxLight.active = false
+            })
+            .start()
+    }
+
     ShowMaskEffect() {
-        this.maskEffect.setSiblingIndex(99)
-        this.scheduleOnce(() => {
-            this.maskEffect.active = true
-        })
+        this.maskEffect.setSiblingIndex(91)
+        this.maskEffect.active = true
+        let opacity = this.maskEffect.getComponent(UIOpacity)
+        opacity.opacity = 0;
+        tween(opacity).to(0.5, { opacity: 255 }).start()
+
     }
 
     HideMaskEffect() {
-        this.maskEffect.active = false
+        let opacity = this.maskEffect.getComponent(UIOpacity)
+        opacity.opacity = 255
+        tween(opacity).to(0.5, { opacity: 0 })
+            .call(() => {
+                this.maskEffect.active = false
+            })
+            .start()
     }
 
 }

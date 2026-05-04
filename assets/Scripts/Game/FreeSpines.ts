@@ -1,5 +1,6 @@
 import { _decorator, Component, Input, Label, Node, sp, tween, Tween } from 'cc';
 import { currencyFormatSimple, GameManager } from '../Manager/GameManager';
+import { MultiplierCarouselFinal } from './MultiplierAnimator';
 const { ccclass, property } = _decorator;
 
 @ccclass('FreeSpines')
@@ -20,6 +21,13 @@ export class FreeSpines extends Component {
     @property(Node)
     btnStartFreeSpin: Node = null
 
+    @property(sp.Skeleton)
+    fxLoading: sp.Skeleton = null
+
+    @property(Node)
+    uiWaitFreeSpin: Node = null
+
+
     protected onLoad(): void {
         FreeSpines.instance = this
     }
@@ -39,13 +47,15 @@ export class FreeSpines extends Component {
 
     playAnimation(numberScratch) {
         this.fx.node.active = true
-        this.fx.setAnimation(0, "_FreeWin_Appear", false)
-        this.fx.addAnimation(0, "_FreeWin_Idle", true)
+        this.fxLoading.setAnimation(0, "btn_circle", true)
+        this.fx.setAnimation(0, "FreeWin_start", false)
+        this.fx.addAnimation(0, "FreeWin_loop", true)
         this.freeSpinLb.string = numberScratch
         this.fx.setCompleteListener((tracking) => {
-            if (tracking.animation.name != "_FreeWin_Idle") return
+            if (tracking.animation.name != "FreeWin_start") return
             this.fx.setCompleteListener(null)
             this.startCheckFree()
+            this.uiWaitFreeSpin.active = true
         });
 
 
@@ -59,26 +69,34 @@ export class FreeSpines extends Component {
             if (GameManager.instance.dataFreespin != null) {
                 clearInterval(this.checkFreeTimer);
                 this.checkFreeTimer = null;
-                this.fx.addAnimation(0, "_FreeWin_Action", false)
-                this.fx.addAnimation(0, "_FreeWin_Action_Idle", false)
+                this.fxLoading.setAnimation(0, "btn_start_idle_click", true)
+
+                // this.fx.addAnimation(0, "_FreeWin_Action", false)
+                // this.fx.addAnimation(0, "_FreeWin_Action_Idle", false)
                 this.btnStartFreeSpin.active = true
 
-                this.fx.setCompleteListener((tracking) => {
-                    if (tracking.animation.name != "_FreeWin_Action_Idle") return
-                    this.fx.setCompleteListener(null)
-
-                });
             }
         }, 100); // check mỗi 100ms
     }
 
 
     BtnStartSpin() {
-        GameManager.instance.SetFreeSpines()
-        this.btnStartFreeSpin.active = false
-        GameManager.instance.indexCurrentReel = 0
-        GameManager.instance.PlayModeFreeSpin()
-        this.fx.node.active = false
+        this.fx.addAnimation(0, "FreeWin_end", true)
+        this.uiWaitFreeSpin.active = false
+
+        this.fx.setCompleteListener((tracking) => {
+            if (tracking.animation.name != "FreeWin_end") return
+            this.fx.setCompleteListener(null)
+            GameManager.instance.SetFreeSpines()
+            this.btnStartFreeSpin.active = false
+            GameManager.instance.indexCurrentReel = 0
+            GameManager.instance.PlayModeFreeSpin()
+            this.fx.node.active = false
+            MultiplierCarouselFinal.instance.switchToScratchMode()  
+
+
+        });
+
     }
 
     ShowTotalSpin(callback, target) {

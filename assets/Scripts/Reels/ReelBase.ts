@@ -2,6 +2,7 @@ import { _decorator, Component, UITransform, Vec3, Tween, tween, instantiate, No
 import { Symbol } from './Symbol';
 import { PrefabManager } from '../Manager/PrefabManager';
 import { GameManager, waitForSeconds } from '../Manager/GameManager';
+import { SymbolType } from '../Enum/ESymbolFace';
 const { ccclass, property } = _decorator;
 
 @ccclass('ReelBase')
@@ -15,7 +16,7 @@ export abstract class ReelBase {
     protected totalSize = 0;
     protected halfSize = 0;
 
-    _delay = 0.04;
+    _delay = 0.06;
     protected _isStopping = false;
     protected _remainSteps = 0;
 
@@ -31,7 +32,7 @@ export abstract class ReelBase {
     public abstract FIRST_VISIBLE: number;
 
     reelNode: Node = null
-    listSymbol = []
+    listSymbol: Node[] = []
     init(reelNode: Node) {
         this.reelNode = reelNode
         for (let i = 0; i < this.numberSymbols; i++) {
@@ -46,7 +47,6 @@ export abstract class ReelBase {
 
     protected collectSymbols() {
         this.symbols = [];
-        console.log(this.listSymbol)
         for (let n of this.listSymbol) {
             const s = n.getComponent(Symbol);
             if (s) {
@@ -81,6 +81,7 @@ export abstract class ReelBase {
             e.isInit = false
             e.node.active = true
         })
+        console.log(this.listSymbol[0].uuid, this.possitionReel, "check", "start")
         tween(this.listSymbol[0])
             .call(() => {
                 if (this.isRolling === false) return;
@@ -93,6 +94,7 @@ export abstract class ReelBase {
                         }
                         s.node.position = this.getSymbolPosition(-1);
                     }
+                    
                     s.rollToIndex(this._delay, Symbol.MoveType.MOVING);
 
                 }
@@ -101,6 +103,7 @@ export abstract class ReelBase {
             .delay(this._delay)
             .call(() => {
                 // this.sortSibling();
+                console.log("con nua")
             })
             .union()
             .repeatForever()
@@ -112,6 +115,7 @@ export abstract class ReelBase {
     stopRoll(result: any[]) {
         this.isRolling = false;
         this._isStopping = true;
+        console.log(this.listSymbol[0].uuid, this.possitionReel, "check", "end")
 
         Tween.stopAllByTarget(this.listSymbol[0]);
 
@@ -156,11 +160,30 @@ export abstract class ReelBase {
     changeSpeed(newDelay: number) {
         this._delay = newDelay;
 
-        Tween.stopAllByTarget();
+        Tween.stopAllByTarget(this.listSymbol[0]);
 
         this.startRoll();
     }
 
+
+    ShowAllSymbol() {
+        this.listSymbol.forEach(e => {
+            e.setSiblingIndex(91)
+            if (e.getComponent(Symbol).face == SymbolType.SCRATCH || e.getComponent(Symbol).face == SymbolType.WILD) {
+                e.setSiblingIndex(92)
+
+            }
+        })
+    }
+
+    HideSymbolDifScratch() {
+        this.listSymbol.forEach(e => {
+            if (e.getComponent(Symbol).face != SymbolType.SCRATCH) {
+                e.setSiblingIndex(0)
+
+            }
+        })
+    }
 
     // public cascadeDrop(dataAbove: any[]) {
     //     const aboveData = this.isHorizontal() ? dataAbove : [...dataAbove].reverse();
@@ -215,50 +238,32 @@ export abstract class ReelBase {
     // }
     public async cascadeDrop(dataAbove: any[]) {
         const aboveData = this.isHorizontal() ? dataAbove : [...dataAbove].reverse();
-
         this.symbols = this.symbols.filter(s => s.node && s.node.isValid);
-
         let space = 0;
         let min = this.VISIBLE_COUNT;
         let max = min * 2 - 1;
-
         let existingSymbols: any[] = [];
         let newSymbols: any[] = [];
-
-        // ======================
-        // 🔹 XỬ LÝ SYMBOL CŨ
-        // ======================
         for (let i = max; i >= min; i--) {
             let s = this.symbols.find(e => e.reelIndex == i);
-
             if (!s) {
                 space++;
             } else {
                 if (space > 0) {
                     const oldRow = s.row;
-
                     s.row += space;
                     s.reelIndex += space;
-
                     if (oldRow >= 0 && GameManager.instance.symBolArray[s.col][oldRow] === s) {
                         GameManager.instance.symBolArray[s.col][oldRow] = null;
                     }
-
                     existingSymbols.push(s);
                     GameManager.instance.symBolArray[s.col][s.row] = s;
                 }
             }
         }
-
-        // ======================
-        // 🔹 TẠO SYMBOL MỚI
-        // ======================
         const createCount = Math.min(space, aboveData.length);
-
         for (let i = createCount - 1; i >= 0; i--) {
             let Symbol = this.createNewSymbol();
-
-
             Symbol.reelIndex = min + i;
             Symbol.node.setPosition(this.getSymbolPosition(Symbol.reelIndex - createCount));
 
@@ -267,9 +272,7 @@ export abstract class ReelBase {
 
             Symbol.col = this.possitionReel;
             Symbol.row = i;
-
             GameManager.instance.symBolArray[Symbol.col][Symbol.row] = Symbol;
-
             newSymbols.push(Symbol);
         }
         for (let i = 0; i < existingSymbols.length; i++) {
