@@ -57,7 +57,8 @@ export class Symbol extends Component {
     @property(sp.Skeleton) icon: sp.Skeleton = null!;
     @property(sp.Skeleton) frame: sp.Skeleton = null!;
     reel: ReelBase = null!;
-    reelIndex = 0;
+    @property(Number)
+    reelIndex: number = 0;
 
 
     col = 0; row = 0
@@ -198,10 +199,10 @@ export class Symbol extends Component {
     rollToIndex(time: number = 0.2, type: string = Symbol.MoveType.MOVING) {
 
         const newPosition = this.reel.getSymbolPosition(this.reelIndex);
+        Tween.stopAllByTarget(this.node);
 
         // ❗ CHỈ stop tween khi STOP, không stop khi MOVING
         if (type === Symbol.MoveType.STOP) {
-            Tween.stopAllByTarget(this.node);
         }
         if (type === Symbol.MoveType.MOVING) {
             this.SetUiMove()
@@ -212,7 +213,7 @@ export class Symbol extends Component {
                 : "cubicOut";
 
         return tween(this.node)
-            .to(time, { position: newPosition }, { easing: easingType })
+            .to(time, { position: newPosition })
             .call(() => {
 
                 this.reelIndex =

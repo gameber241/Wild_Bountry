@@ -28,6 +28,8 @@ export abstract class ReelBase {
     @property(Number)
     numberSymbols: number = 9;
 
+    reelProtect: Node = null
+
     public abstract VISIBLE_COUNT: number;
     public abstract FIRST_VISIBLE: number;
 
@@ -71,6 +73,7 @@ export abstract class ReelBase {
 
 
     startRoll() {
+
         this._isStopping = false;
         this.isRolling = true;
         this.collectSymbols();
@@ -81,8 +84,7 @@ export abstract class ReelBase {
             e.isInit = false
             e.node.active = true
         })
-        console.log(this.listSymbol[0].uuid, this.possitionReel, "check", "start")
-        tween(this.listSymbol[0])
+        tween(this.reelProtect)
             .call(() => {
                 if (this.isRolling === false) return;
                 for (let s of this.symbols) {
@@ -94,7 +96,7 @@ export abstract class ReelBase {
                         }
                         s.node.position = this.getSymbolPosition(-1);
                     }
-                    
+
                     s.rollToIndex(this._delay, Symbol.MoveType.MOVING);
 
                 }
@@ -102,7 +104,6 @@ export abstract class ReelBase {
             })
             .delay(this._delay)
             .call(() => {
-                // this.sortSibling();
                 console.log("con nua")
             })
             .union()
@@ -115,9 +116,7 @@ export abstract class ReelBase {
     stopRoll(result: any[]) {
         this.isRolling = false;
         this._isStopping = true;
-        console.log(this.listSymbol[0].uuid, this.possitionReel, "check", "end")
-
-        Tween.stopAllByTarget(this.listSymbol[0]);
+        Tween.stopAllByTarget(this.reelProtect);
 
         const total = this.symbols.length;
         const visible = this.VISIBLE_COUNT;
@@ -158,10 +157,9 @@ export abstract class ReelBase {
         // SoundToggle.instance?.PlaySymbolDrop();
     }
     changeSpeed(newDelay: number) {
+        console.log("den day ....")
         this._delay = newDelay;
-
-        Tween.stopAllByTarget(this.listSymbol[0]);
-
+        Tween.stopAllByTarget(this.reelProtect);
         this.startRoll();
     }
 
@@ -177,10 +175,9 @@ export abstract class ReelBase {
     }
 
     HideSymbolDifScratch() {
-        this.listSymbol.forEach(e => {
-            if (e.getComponent(Symbol).face != SymbolType.SCRATCH) {
-                e.setSiblingIndex(0)
-
+        this.symbols.forEach(e => {
+            if (e.face != SymbolType.SCRATCH) {
+                e.node.setSiblingIndex(0)
             }
         })
     }

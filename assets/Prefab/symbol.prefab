@@ -307,7 +307,7 @@
       "__expectedType__": "sp.SkeletonData"
     },
     "defaultSkin": "default",
-    "defaultAnimation": "Icon_idle",
+    "defaultAnimation": "Icon_Scatter_idle",
     "_premultipliedAlpha": true,
     "_timeScale": 1,
     "_preCacheMode": 0,
@@ -386,6 +386,7 @@
     "frame": {
       "__id__": 5
     },
+    "reelIndex": 0,
     "_id": ""
   },
   {

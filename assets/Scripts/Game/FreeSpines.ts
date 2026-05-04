@@ -87,12 +87,12 @@ export class FreeSpines extends Component {
         this.fx.setCompleteListener((tracking) => {
             if (tracking.animation.name != "FreeWin_end") return
             this.fx.setCompleteListener(null)
-            GameManager.instance.SetFreeSpines()
+            GameManager.instance.SetModeFreeSpin()
             this.btnStartFreeSpin.active = false
             GameManager.instance.indexCurrentReel = 0
             GameManager.instance.PlayModeFreeSpin()
             this.fx.node.active = false
-            MultiplierCarouselFinal.instance.switchToScratchMode()  
+            MultiplierCarouselFinal.instance.switchToScratchMode()
 
 
         });

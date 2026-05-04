@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, tween, UIOpacity } from 'cc';
+import { _decorator, Component, Node, Tween, tween, UIOpacity } from 'cc';
 import { ReelVertical } from './ReelVertical';
 const { ccclass, property } = _decorator;
 
@@ -16,6 +16,9 @@ export class ListReel extends Component {
     @property(Node)
     vfxLight: Node = null
 
+    @property(Node)
+    listReelNode: Node = null
+
 
     protected onLoad(): void {
         ListReel.instance = this
@@ -27,6 +30,7 @@ export class ListReel extends Component {
             reel.possitionReel = i
             this.SetUpReel(reel, i)
             reel.init(this.containSymbol)
+            reel.reelProtect = this.listReelNode.children[i]
             this.reels.push(reel)
         }
     }
@@ -103,16 +107,18 @@ export class ListReel extends Component {
                 posX = 296
                 break;
         }
+        
         let opacity = this.vfxLight.getComponent(UIOpacity)
         opacity.opacity = 0;
         this.vfxLight.active = true
         this.vfxLight.setPosition(posX, -32, 0)
-
+        Tween.stopAllByTarget(opacity)
         tween(opacity).to(0.5, { opacity: 255 }).start()
     }
     HideVfxLight() {
         let opacity = this.vfxLight.getComponent(UIOpacity)
         opacity.opacity = 255
+        Tween.stopAllByTarget(opacity)
         tween(opacity).to(0.5, { opacity: 0 })
             .call(() => {
                 this.vfxLight.active = false

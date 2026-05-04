@@ -40,62 +40,7 @@ export class GameManager extends Component {
     cameraMain: Camera = null;
 
 
-
-    // @property(Label)
-    // walet: Label = null
-    // @property(Label)
-    // walletAuto: Label = null
-
-    // @property(Label)
-    // winLb: Label = null
-
-    // @property(Label)
-    // winLbAuto: Label = null
-
-    // @property(Label)
-    // betLb: Label = null
-
-    // @property(Label)
-    // betLbAuto: Label = null
-
-    // @property(Label)
-    // numberFreeSpin: Label = null
-
-    // @property(Node)
-    // headerNormal: Node = null
-
-    // @property(Node)
-    // headerFreeSpines: Node = null
-
-    // @property(Node)
-    // frameReel1Normal: Node = null
-
-    // @property(Node)
-    // frameReel1FreeSpin: Node = null
-
-    // @property(Node)
-    // footFreeSpin: Node = null
-
-    // @property(Node)
-    // walletNode: Node = null
-
-    // @property(Node)
-    // footer: Node
-
-    // @property(Node)
-    // optionSetting: Node = null
-
-    // @property(Node)
-    // bgBotNormal: Node = null
-
-    // @property(Node)
-    // bgFreeGame: Node = null
-
-    // @property(AutoCtrl)
-    // UiAuto: AutoCtrl = null
     isTurbo = false
-    // @property(Node)
-    // maskInf: Node = null
 
     turboMode = 0
 
@@ -119,9 +64,8 @@ export class GameManager extends Component {
         // EventBus.getInstance().on('profile:updated', this.onProfileUpdated, this);
     }
     protected start(): void {
-        this.UpdatePrice()
         this.UpdatePriceWin
-        this.SetNormal()
+        this.SetModeNormal()
         this.initGrid()
         this.updateBalanceDisplay();
         this.reels = ListReel.instance.reels
@@ -310,7 +254,7 @@ export class GameManager extends Component {
         // Waymanager.instance.resetWay()
         const round = this.sampleJson.rounds[this.indexCurrentReel];
 
-        this.SetNormal();
+        this.SetModeNormal();
         const grid = round.grid;
         this.GenerateMap(grid);
     }
@@ -365,40 +309,43 @@ export class GameManager extends Component {
     private async stopPhase2(index: number, grid: any[]) {
         tween(this.cameraMain).to(1, { orthoHeight: this.otherHeight + 150 })
             .call(async () => {
-                TextBoxGame.instant.playScratch()
-                let current = index + 1;
 
-                while (current < this.reels.length) {
-                    const reel = this.reels[current];
-                    reel.changeSpeed(0.1)
-                    ListReel.instance.ShowMaskEffect()
-                    this.ShowAllScratch(current)
-                    reel.ShowAllSymbol()
-                    ListReel.instance.ShowVfxLight(current)
-                    await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
-                    reel.stopRoll(grid[current]);
-                    reel._delay = 0.06
-                    ListReel.instance.HideVfxLight()
-                    await GameManager.waitForSeconds(0.5);
-                    reel.HideSymbolDifScratch()
-                    current++;
-                }
-
-                // Khi stop hết reel
-                // this.playAnimReelScratch(99);
-                this.scheduleOnce(() => {
-                    this.ShowAllReef(true)
-                    this.scheduleOnce(() => {
-                        tween(this.cameraMain).to(0.5, { orthoHeight: this.otherHeight })
-                            .call(() => {
-                                this.ClearData()
-                            })
-                            .start()
-                    }, 1)
-
-                }, 0.4)
             })
             .start()
+
+        TextBoxGame.instant.playScratch()
+        let current = index + 1;
+
+        while (current < this.reels.length) {
+            const reel = this.reels[current];
+            reel.changeSpeed(0.1)
+            ListReel.instance.ShowMaskEffect()
+            this.ShowAllScratch(current)
+            reel.ShowAllSymbol()
+            ListReel.instance.ShowVfxLight(current)
+            await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
+            reel.stopRoll(grid[current]);
+            reel._delay = 0.06
+            ListReel.instance.HideVfxLight()
+            await GameManager.waitForSeconds(0.3);
+            reel.HideSymbolDifScratch()
+
+            current++;
+        }
+
+        // Khi stop hết reel
+        // this.playAnimReelScratch(99);
+        this.scheduleOnce(() => {
+            this.ShowAllReef(true)
+            this.scheduleOnce(() => {
+                tween(this.cameraMain).to(0.5, { orthoHeight: this.otherHeight })
+                    .call(() => {
+                        this.ClearData()
+                    })
+                    .start()
+            }, 1)
+
+        }, 0.4)
 
     }
 
@@ -512,16 +459,8 @@ export class GameManager extends Component {
         }
         else {
             if (this.stepOld > 2) {
-                // TextBoxCombo.instant.box.setAnimation(0, "textBox3_idle", true)
             }
-            else {
-                // TextBoxCombo.instant.box.setAnimation(0, "textBox1_idle", true)
-            }
-
             this.ShowBigWin();
-
-            // ComboManager.instantiate.total.node.active = false
-
         }
     }
 
@@ -542,7 +481,7 @@ export class GameManager extends Component {
                 else {
                     this.indexCurrentReel = 0;
                     Spin.instance.ActiveSpin()
-                    this.SetNormal();
+                    this.SetModeNormal();
                     // SoundToggle.instance.playNormal()
                     if (Spin.instance.isAuto == true) {
                         Spin.instance.AutoSpinNext()
@@ -682,35 +621,6 @@ export class GameManager extends Component {
             // tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 0 }).start()
         })
     }
-    isFree = false
-    public SetNormal() {
-        // if (this.isFree == true) {
-        //     SoundToggle.instance.playNormal()
-        //     this.isFree = false
-        // }
-        // this.headerNormal.active = true
-        // this.headerFreeSpines.active = false
-        // this.frameReel1Normal.active = true
-        // this.frameReel1FreeSpin.active = false
-        // this.footFreeSpin.active = false
-        // this.walletNode.setPosition(0, -436)
-        // this.bgBotNormal.active = true
-        // this.bgFreeGame.active = false
-    }
-
-    public SetFreeSpines() {
-        this.isFree = true
-        // this.headerNormal.active = false
-        // this.headerFreeSpines.active = true
-        // this.frameReel1Normal.active = false
-        // this.frameReel1FreeSpin.active = true
-        // this.footFreeSpin.active = true
-        // this.walletNode.setPosition(0, -679.364)
-        // this.bgBotNormal.active = false
-        // this.bgFreeGame.active = true
-    }
-
-
 
     isShowSetting = false
 
@@ -718,20 +628,7 @@ export class GameManager extends Component {
 
     priceOffset = 2000
     priceMax = 20000
-    BtnMinus() {
-        // this.betLb.node.getComponent(LabelBet).decreaseBet()
 
-    }
-
-    BtnPlus() {
-        // this.betLb.node.getComponent(LabelBet).increaseBet()
-
-    }
-
-    UpdatePrice() {
-        // this.totalPrice.string = this.betCurrent.toString()
-        // this.totalPriceBot.string = this.betCurrent.toString()
-    }
 
     static waitForSeconds(s: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, s * 1000));
@@ -812,19 +709,10 @@ export class GameManager extends Component {
         this.DatCuocNode.active = true
     }
 
-    onClickMap() {
-        // director.emit("HIDE_INF")
-        // this.maskInf.active = false
-    }
 
 
     betCurrent = 0.6
-    UpdateBetCurrent(bet) {
-        // this.betCurrent = bet
-        // this.betLb.node.getComponent(LabelBet).updateFromPanelBet()
-        // this.betLbAuto.node.getComponent(LabelBet).updateFromPanelBet()
 
-    }
     isFreeSpin = false
     indexCurrentFreeSpin = 0
     totalFreeSpin = 0
@@ -842,39 +730,38 @@ export class GameManager extends Component {
     }
 
     PlayModeFreeSpin() {
-        // let dataFree = this.GetDataFreeSpin()
-        // if (dataFree == null) {
-        //     FreeSpines.instance.ShowTotalSpin(() => {
-        //         this.indexCurrentFreeSpin = 0
-        //         this.isFreeSpin = false
-        //         this.totalFreeSpin = 0
-        //         this.dataFreespin = null
-        //         Spin.instance.ActiveSpin()
-        //         this.SetNormal();
-        //         SoundToggle.instance.playNormal()
-        //         if (Spin.instance.isAuto == true) {
-        //             Spin.instance.AutoSpinNext()
-        //         }
-        //         else {
-        //             Spin.instance.isSpin = false;
-        //         }
-        //     }, this.dataFreespin.payload.batchSummary.totalWin);
-        //     return;
-        // }
-        // this.SetFreeSpines()
-        // this.indexCurrentFreeSpin++
-        // this.totalFreeSpin--
-        // this.isFreeSpin = true
-        // TextBoxCombo.instant.box.setAnimation(0, "textBox1_idle", true)
-        // this.UpdatePriceWin()
-        // TextBoxCombo.instant.playRandomText()
-        // this.stepOld = 1
-        // Spin.instance.isSpin = true
+        let dataFree = this.GetDataFreeSpin()
+        if (dataFree == null) {
+            FreeSpines.instance.ShowTotalSpin(() => {
+                this.indexCurrentFreeSpin = 0
+                this.isFreeSpin = false
+                this.totalFreeSpin = 0
+                this.dataFreespin = null
+                Spin.instance.ActiveSpin()
+                this.SetModeNormal();
+                // SoundToggle.instance.playNormal()
+                if (Spin.instance.isAuto == true) {
+                    Spin.instance.AutoSpinNext()
+                }
+                else {
+                    Spin.instance.isSpin = false;
+                }
+            }, this.dataFreespin.payload.batchSummary.totalWin);
+            return;
+        }
+        this.SetModeFreeSpin()
+        this.indexCurrentFreeSpin++
+        this.totalFreeSpin--
+        this.isFreeSpin = true
+        this.UpdatePriceWin()
+        TextBoxGame.instant.playRandomText()
+        this.stepOld = 1
+        Spin.instance.isSpin = true
         // Waymanager.instance.resetWay()
-        // this.sampleJson = dataFree
-        // const grid = this.sampleJson.rounds[this.indexCurrentReel].grid;
+        this.sampleJson = dataFree
+        const grid = this.sampleJson.rounds[this.indexCurrentReel].grid;
         // FreeSpines.instance.UpdateFreeSpinLb(this.totalFreeSpin)
-        // this.GenerateMap(grid);
+        this.GenerateMap(grid);
     }
 
 
@@ -889,6 +776,36 @@ export class GameManager extends Component {
             }
 
         })
+    }
+
+
+    // change mode
+
+    @property(Sprite)
+    bgReels: Sprite = null
+
+
+    @property(SpriteFrame)
+    bgReelsSp1: SpriteFrame[] = []
+
+    @property(Node)
+    bgDown: Node = null
+
+
+    SetModeNormal() {
+        this.bgReels.spriteFrame = this.bgReelsSp1[0]
+        this.bgDown.active = true
+        this.bgReels.node.setPosition(0, 117, 0)
+
+    }
+
+
+    SetModeFreeSpin() {
+        this.bgReels.spriteFrame = this.bgReelsSp1[1]
+        this.bgDown.active = false
+        this.bgReels.node.setPosition(0, 41, 0)
+
+
     }
 }
 
