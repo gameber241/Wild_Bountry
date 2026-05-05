@@ -740,6 +740,8 @@ export class GameManager extends Component {
                 Spin.instance.ActiveSpin()
                 this.SetModeNormal();
                 // SoundToggle.instance.playNormal()
+                // MultiplierCarouselFinal.instance.resetCombo()
+
                 if (Spin.instance.isAuto == true) {
                     Spin.instance.AutoSpinNext()
                 }
@@ -791,11 +793,18 @@ export class GameManager extends Component {
     @property(Node)
     bgDown: Node = null
 
+    @property(Node)
+    bgFreeSpin: Node = null
+
+    @property(Node)
+    walletNode: Node = null
 
     SetModeNormal() {
         this.bgReels.spriteFrame = this.bgReelsSp1[0]
         this.bgDown.active = true
         this.bgReels.node.setPosition(0, 117, 0)
+        this.bgFreeSpin.active = false
+        this.walletNode.setPosition(21.22, -354)
 
     }
 
@@ -804,8 +813,8 @@ export class GameManager extends Component {
         this.bgReels.spriteFrame = this.bgReelsSp1[1]
         this.bgDown.active = false
         this.bgReels.node.setPosition(0, 41, 0)
-
-
+        this.bgFreeSpin.active = true
+        this.walletNode.setPosition(21.22, -596.327)
     }
 }
 

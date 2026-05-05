@@ -90,7 +90,6 @@ export class FreeSpines extends Component {
             GameManager.instance.SetModeFreeSpin()
             this.btnStartFreeSpin.active = false
             GameManager.instance.indexCurrentReel = 0
-            GameManager.instance.PlayModeFreeSpin()
             this.fx.node.active = false
             MultiplierCarouselFinal.instance.switchToScratchMode()
 

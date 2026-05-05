@@ -1,0 +1,663 @@
+
+VFX.png
+size: 2368,2400
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+VFX_light1/clip_em_1
+  rotate: true
+  xy: 2, 108
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_10
+  rotate: false
+  xy: 1998, 1633
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_11
+  rotate: false
+  xy: 2120, 1633
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_12
+  rotate: false
+  xy: 2242, 1782
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_2
+  rotate: true
+  xy: 311, 108
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_3
+  rotate: true
+  xy: 620, 108
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_4
+  rotate: true
+  xy: 929, 108
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_5
+  rotate: false
+  xy: 2244, 2091
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_6
+  rotate: true
+  xy: 1696, 1494
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_7
+  rotate: true
+  xy: 1454, 408
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_8
+  rotate: true
+  xy: 1750, 164
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_9
+  rotate: true
+  xy: 1750, 42
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_1
+  rotate: false
+  xy: 2, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_10
+  rotate: false
+  xy: 728, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_11
+  rotate: false
+  xy: 244, 472
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_12
+  rotate: true
+  xy: 2, 230
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_13
+  rotate: false
+  xy: 486, 954
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_14
+  rotate: false
+  xy: 728, 1436
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_15
+  rotate: false
+  xy: 970, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_16
+  rotate: false
+  xy: 486, 472
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_17
+  rotate: false
+  xy: 728, 954
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_18
+  rotate: false
+  xy: 970, 1436
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_19
+  rotate: false
+  xy: 1212, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_2
+  rotate: false
+  xy: 2, 1436
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_20
+  rotate: false
+  xy: 728, 472
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_21
+  rotate: true
+  xy: 484, 230
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_22
+  rotate: false
+  xy: 970, 954
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_23
+  rotate: false
+  xy: 1212, 1436
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_24
+  rotate: false
+  xy: 1454, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_25
+  rotate: false
+  xy: 970, 472
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_26
+  rotate: false
+  xy: 1212, 954
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_27
+  rotate: false
+  xy: 1454, 1436
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_28
+  rotate: false
+  xy: 1696, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_29
+  rotate: false
+  xy: 1212, 472
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_3
+  rotate: false
+  xy: 244, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_30
+  rotate: true
+  xy: 966, 230
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_4
+  rotate: false
+  xy: 2, 954
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_5
+  rotate: false
+  xy: 244, 1436
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_6
+  rotate: false
+  xy: 486, 1918
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_7
+  rotate: false
+  xy: 2, 472
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_8
+  rotate: false
+  xy: 244, 954
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_line/clip_emitparticles_9
+  rotate: false
+  xy: 486, 1436
+  size: 240, 480
+  orig: 240, 480
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_1
+  rotate: false
+  xy: 1454, 1134
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_10
+  rotate: false
+  xy: 2058, 1331
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_11
+  rotate: false
+  xy: 2058, 1029
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_12
+  rotate: false
+  xy: 2058, 727
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_13
+  rotate: false
+  xy: 2065, 425
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_14
+  rotate: false
+  xy: 2065, 123
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_2
+  rotate: false
+  xy: 1454, 832
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_3
+  rotate: false
+  xy: 1454, 530
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_4
+  rotate: false
+  xy: 1696, 1616
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_5
+  rotate: false
+  xy: 1756, 1192
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_6
+  rotate: false
+  xy: 1756, 890
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_7
+  rotate: false
+  xy: 1756, 588
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_8
+  rotate: false
+  xy: 1448, 106
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_9
+  rotate: false
+  xy: 1763, 286
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_1
+  rotate: false
+  xy: 1938, 1942
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_2
+  rotate: false
+  xy: 2090, 1942
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_3
+  rotate: false
+  xy: 1238, 78
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+lightO
+  rotate: false
+  xy: 1938, 2094
+  size: 304, 304
+  orig: 304, 304
+  offset: 0, 0
+  index: -1
+par1
+  rotate: false
+  xy: 2, 2
+  size: 104, 104
+  orig: 104, 104
+  offset: 0, 0
+  index: -1
+par_1
+  rotate: false
+  xy: 1696, 1472
+  size: 20, 20
+  orig: 20, 20
+  offset: 0, 0
+  index: -1
+
+VFX2.png
+size: 2312,620
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+VFX_light1/clip_em_13
+  rotate: false
+  xy: 2, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_14
+  rotate: false
+  xy: 2, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_15
+  rotate: false
+  xy: 124, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_16
+  rotate: false
+  xy: 124, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_17
+  rotate: false
+  xy: 246, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_18
+  rotate: false
+  xy: 246, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_19
+  rotate: false
+  xy: 368, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_20
+  rotate: false
+  xy: 368, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_21
+  rotate: false
+  xy: 490, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_22
+  rotate: false
+  xy: 490, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_23
+  rotate: false
+  xy: 612, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_24
+  rotate: false
+  xy: 612, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_25
+  rotate: false
+  xy: 734, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_26
+  rotate: false
+  xy: 734, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_27
+  rotate: false
+  xy: 856, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_28
+  rotate: false
+  xy: 856, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_29
+  rotate: false
+  xy: 978, 311
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_light1/clip_em_30
+  rotate: false
+  xy: 978, 2
+  size: 120, 307
+  orig: 120, 307
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_15
+  rotate: false
+  xy: 1100, 318
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_16
+  rotate: false
+  xy: 1100, 16
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_17
+  rotate: false
+  xy: 1402, 318
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+VFX_smoke/clip_combo_spark_smoke_18
+  rotate: false
+  xy: 1402, 16
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_10
+  rotate: false
+  xy: 2008, 14
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_4
+  rotate: false
+  xy: 1704, 166
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_5
+  rotate: false
+  xy: 1704, 14
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_6
+  rotate: false
+  xy: 1856, 166
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_7
+  rotate: false
+  xy: 1856, 14
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_8
+  rotate: false
+  xy: 2008, 166
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+clip_explode_s/clip_explode_9
+  rotate: false
+  xy: 2160, 166
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
+lightO2
+  rotate: false
+  xy: 1704, 318
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+lightO3
+  rotate: false
+  xy: 2006, 318
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1

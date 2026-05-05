@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Prefab, instantiate, Vec3, tween, Label, UIOpacity, Color, Font } from 'cc';
+import { GameManager } from '../Manager/GameManager';
 const { ccclass, property } = _decorator;
 
 // ===== MODE =====
@@ -327,6 +328,9 @@ export class MultiplierCarouselFinal extends Component {
 
         tween(this.node)
             .to(1, { position: new Vec3(0, 782.674) }, { easing: "backInOut" })
+            .call(() => {
+                GameManager.instance.PlayModeFreeSpin()
+            })
             .start();
     }
 }
