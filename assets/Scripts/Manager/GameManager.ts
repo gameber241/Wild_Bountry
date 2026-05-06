@@ -318,16 +318,16 @@ export class GameManager extends Component {
 
         while (current < this.reels.length) {
             const reel = this.reels[current];
-            reel.changeSpeed(0.1)
+            reel.changeSpeed(0.2)
             ListReel.instance.ShowMaskEffect()
             this.ShowAllScratch(current)
             reel.ShowAllSymbol()
             ListReel.instance.ShowVfxLight(current)
             await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
-            reel.stopRoll(grid[current]);
             reel._delay = 0.06
+            reel.stopRoll(grid[current]);
             ListReel.instance.HideVfxLight()
-            await GameManager.waitForSeconds(0.3);
+            await GameManager.waitForSeconds(1);
             reel.HideSymbolDifScratch()
 
             current++;
@@ -779,8 +779,6 @@ export class GameManager extends Component {
 
         })
     }
-
-
     // change mode
 
     @property(Sprite)
@@ -799,12 +797,15 @@ export class GameManager extends Component {
     @property(Node)
     walletNode: Node = null
 
+    @property(Node)
+    btnNode: Node = null
     SetModeNormal() {
         this.bgReels.spriteFrame = this.bgReelsSp1[0]
         this.bgDown.active = true
         this.bgReels.node.setPosition(0, 117, 0)
         this.bgFreeSpin.active = false
         this.walletNode.setPosition(21.22, -354)
+        this.btnNode.active = true
 
     }
 
@@ -815,6 +816,8 @@ export class GameManager extends Component {
         this.bgReels.node.setPosition(0, 41, 0)
         this.bgFreeSpin.active = true
         this.walletNode.setPosition(21.22, -596.327)
+        this.btnNode.active = false
+
     }
 }
 
