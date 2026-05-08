@@ -38,13 +38,7 @@ export class GameManager extends Component {
 
     @property(Camera)
     cameraMain: Camera = null;
-
-
-    isTurbo = false
-
     turboMode = 0
-
-
     //data Freespin
     dataFreespin = dataSpin
     otherHeight = 0
@@ -64,7 +58,7 @@ export class GameManager extends Component {
         // EventBus.getInstance().on('profile:updated', this.onProfileUpdated, this);
     }
     protected start(): void {
-        this.UpdatePriceWin
+        this.UpdateStepWIn
         this.SetModeNormal()
         this.initGrid()
         this.updateBalanceDisplay();
@@ -87,6 +81,12 @@ export class GameManager extends Component {
         // }
     }
 
+    betCurrent: number = 0.6
+    stepWin: number = 0
+    UpdateBetCurrent(bet) {
+        this.betCurrent = bet
+        director.emit("BET_CURRENT", bet)
+    }
     extractBalanceFromPayload(payload: any): number | null {
 
         if (!payload) {
@@ -139,6 +139,8 @@ export class GameManager extends Component {
     protected onDestroy(): void {
         // EventBus.getInstance().off('profile:updated', this.onProfileUpdated);
     }
+
+
 
     symBolArray: Symbol[][]
 
@@ -247,7 +249,7 @@ export class GameManager extends Component {
         MultiplierCarouselFinal.instance.resetCombo()
         this.sampleJson = sampleJson
         this.stepWinCurrent = 0
-        this.UpdatePriceWin()
+        this.UpdateStepWIn(0)
         // TextBoxCombo.instant.playRandomText()
         this.stepOld = 1
         Spin.instance.isSpin = true
@@ -259,9 +261,9 @@ export class GameManager extends Component {
         this.GenerateMap(grid);
     }
 
-    UpdatePriceWin() {
-        // this.winLb.string = currencyFormatSimple.format(this.stepWinCurrent)
-        // this.winLbAuto.string = currencyFormatSimple.format(this.stepWinCurrent)
+    UpdateStepWIn(stepWin) {
+        this.stepWin = stepWin
+        director.emit("UPDATE_STEPWIN", stepWin)
 
     }
     GenerateMap(grid: any[][]) {
@@ -405,7 +407,7 @@ export class GameManager extends Component {
             // Waymanager.instance.animWay(r.win.ways)
             ListReel.instance.maskEffect.active = true
             this.stepWinCurrent += r.win.stepWin
-            this.UpdatePriceWin()
+            this.UpdateStepWIn(this.stepWinCurrent)
             this.removeWinDuplicateFlip(r)
             const flipPos = new Set(
                 r.flips.map(f => `${f.from.c}_${f.from.r}`)
@@ -687,20 +689,6 @@ export class GameManager extends Component {
         });
     }
 
-    @property(Node)
-    ballanNode: Node = null
-
-    @property(Label)
-    ballanTitle: Label = null
-
-
-    BtnBallan() {
-        this.ballanNode.active = true
-    }
-    btnCloseBallan() {
-        this.ballanNode.active = false
-
-    }
 
     @property(Node)
     DatCuocNode: Node = null
@@ -711,7 +699,6 @@ export class GameManager extends Component {
 
 
 
-    betCurrent = 0.6
 
     isFreeSpin = false
     indexCurrentFreeSpin = 0
@@ -755,7 +742,6 @@ export class GameManager extends Component {
         this.indexCurrentFreeSpin++
         this.totalFreeSpin--
         this.isFreeSpin = true
-        this.UpdatePriceWin()
         TextBoxGame.instant.playRandomText()
         this.stepOld = 1
         Spin.instance.isSpin = true
@@ -792,6 +778,8 @@ export class GameManager extends Component {
     bgDown: Node = null
 
     @property(Node)
+    bgUp: Node = null
+    @property(Node)
     bgFreeSpin: Node = null
 
     @property(Node)
@@ -799,6 +787,11 @@ export class GameManager extends Component {
 
     @property(Node)
     btnNode: Node = null
+
+
+    @property(Node)
+    wayFree: Node = null
+
     SetModeNormal() {
         this.bgReels.spriteFrame = this.bgReelsSp1[0]
         this.bgDown.active = true
@@ -806,7 +799,8 @@ export class GameManager extends Component {
         this.bgFreeSpin.active = false
         this.walletNode.setPosition(21.22, -354)
         this.btnNode.active = true
-
+        this.bgUp.active = true
+        this.wayFree.active = false
     }
 
 
@@ -817,6 +811,8 @@ export class GameManager extends Component {
         this.bgFreeSpin.active = true
         this.walletNode.setPosition(21.22, -596.327)
         this.btnNode.active = false
+        this.bgUp.active = false
+        this.wayFree.active = true
 
     }
 }
