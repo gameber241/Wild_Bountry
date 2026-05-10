@@ -101,7 +101,7 @@ export class PanelBet extends Component {
         this.csBetBase.node.on("value_changed", this.onBetChanged, this)
 
         this.csBetAmount.values = this.betAmounts;
-        this.csBetAmount.regenerateValues();
+        this.csBetAmount.regenerateValues(true);
         this.csBetAmount.node.on("value_changed", this.onAmountChanged, this)
 
         this.commitToLabelBet();

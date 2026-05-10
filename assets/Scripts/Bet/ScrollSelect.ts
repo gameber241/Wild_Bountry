@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, CCInteger, Component, instantiate, Label, Layout, Node, Prefab, ScrollView, setRandGenerator, UITransform, v2, v3 } from 'cc';
+import { _decorator, CCFloat, CCInteger, Color, Component, instantiate, Label, Layout, Node, Prefab, ScrollView, setRandGenerator, UITransform, v2, v3 } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('ScrollSelect')
@@ -27,7 +27,7 @@ export class ScrollSelect extends Component {
 
     _items: Node[] = [];
     _contentHeight: number = 0;
-    
+
     _index = 0;
     get index() {
         return this._index;
@@ -56,24 +56,26 @@ export class ScrollSelect extends Component {
 
     scrollToValue(value: number) {
         let id = this.values.indexOf(value)
-        if(id > -1){
+        if (id > -1) {
             this.index = id;
         }
     }
 
-    regenerateValues() {
-        if(!this.prefabItem) return;
+    regenerateValues(isColor = false) {
+        if (!this.prefabItem) return;
 
         this.scrollView.content.removeAllChildren();
         this._items = [];
 
-        for(let i = 0; i < this.values.length; i++){
+        for (let i = 0; i < this.values.length; i++) {
             const item = instantiate(this.prefabItem);
             this.scrollView.content.addChild(item);
             item.name = `item_${i}`;
             item.position = v3(0, -this.itemHeight * i - this.itemHeight / 2, 0)
             const label = item.getComponent(Label);
-            if(label) {
+            if (isColor == true)
+                label.color = new Color(248, 210, 0)
+            if (label) {
                 label.string = this.values[i].toFixed(this.digitFractor);
             }
             this._items.push(item);
@@ -100,11 +102,10 @@ export class ScrollSelect extends Component {
     onScrollViewEndScroll(sv) {
         let yy = sv.getScrollOffset().y;
         let id = Math.round((yy / this._contentHeight) * this.values.length);
-        if(id != this._index)
-        {
+        if (id != this._index) {
             this.index = id;
             this.node.emit("value_changed", this.values[id], this);
-        }else{   
+        } else {
             this.scrollToIndex(id);
         }
     }
