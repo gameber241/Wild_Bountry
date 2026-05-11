@@ -2,13 +2,17 @@ import { _decorator, Component, Label, Node, Sprite, SpriteFrame, tween, UIOpaci
 import { ReelBase } from '../Reels/ReelBase';
 import { SymbolType } from '../Enum/ESymbolFace';
 import { Symbol } from '../Reels/Symbol';
-import { dataSpin, sampleJson } from '../DataExample';
 import { ListReel } from '../Reels/ListReel';
 import { Spin } from '../Game/Spin';
 import { MultiplierCarouselFinal } from '../Game/MultiplierAnimator';
 import { TextBoxGame } from '../Game/TextBoxGame';
 import { BigWin } from '../Game/BigWin';
 import { FreeSpines } from '../Game/FreeSpines';
+import { AuthService } from '../Server/AuthService';
+import { NetworkService } from '../Server/NetworkService';
+import { UserInfo } from '../Server/UserInfo';
+import { PanelBet } from '../Bet/PanelBet';
+import { SymbolFrameState } from '../Enum/SymbolFrameState';
 
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -40,7 +44,7 @@ export class GameManager extends Component {
     cameraMain: Camera = null;
     turboMode = 0
     //data Freespin
-    dataFreespin = dataSpin
+    dataFreespin: any = null
     otherHeight = 0
     AnimFirstGame() {
         this.otherHeight = this.cameraMain.orthoHeight
@@ -58,7 +62,18 @@ export class GameManager extends Component {
         // EventBus.getInstance().on('profile:updated', this.onProfileUpdated, this);
     }
     protected start(): void {
-        this.UpdateStepWIn
+        void this.bootstrapGame();
+    }
+
+    private async bootstrapGame(): Promise<void> {
+        try {
+            await AuthService.ensureAuthenticated();
+        } catch (error) {
+            console.error('[GameManager] Auto login error:', error);
+        }
+
+        this.syncBetFromPanel();
+        this.UpdateStepWIn(0)
         this.SetModeNormal()
         this.initGrid()
         this.updateBalanceDisplay();
@@ -81,12 +96,112 @@ export class GameManager extends Component {
         // }
     }
 
-    betCurrent: number = 0.6
+    betCurrent: number = 0
+    betSizeCurrent: number = 0
+    betLevelCurrent: number = 0
+    betBaseCurrent: number = 0
     stepWin: number = 0
-    UpdateBetCurrent(bet) {
+    UpdateBetCurrent(bet: number) {
         this.betCurrent = bet
         director.emit("BET_CURRENT", bet)
     }
+
+    UpdateBetConfig(betAmount: number, betSize: number, betLevel: number, betBase: number) {
+        this.betCurrent = betAmount
+        this.betSizeCurrent = betSize
+        this.betLevelCurrent = betLevel
+        this.betBaseCurrent = betBase
+        director.emit("BET_CURRENT", betAmount)
+    }
+
+    private syncBetFromPanel(): void {
+        const panel = PanelBet.instance;
+        if (!panel) {
+            return;
+        }
+
+        this.UpdateBetConfig(panel.betAmount, panel.betSize, panel.betLevel, panel.betBetbase);
+    }
+
+    private getSpinBetConfig() {
+        if (this.betCurrent <= 0 || this.betSizeCurrent <= 0 || this.betLevelCurrent <= 0 || this.betBaseCurrent <= 0) {
+            this.syncBetFromPanel();
+        }
+
+        return {
+            bet: this.betCurrent,
+            betSize: this.betSizeCurrent,
+            betLevel: this.betLevelCurrent,
+            betBase: this.betBaseCurrent,
+        };
+    }
+
+    private applySpinResult(spinResult: any): void {
+        const payload = spinResult?.payload ?? spinResult?.data ?? spinResult ?? {};
+        const normalizedPayload = this.normalizeSpinPayload(payload);
+
+        this.sampleJson = normalizedPayload;
+        this.dataFreespin = Array.isArray(normalizedPayload.batchSpins)
+            ? { payload: normalizedPayload }
+            : null;
+        this.indexCurrentReel = 0;
+        this.indexCurrentFreeSpin = 0;
+    }
+
+    private normalizeSpinPayload(payload: any) {
+        return {
+            ...payload,
+            rounds: Array.isArray(payload?.rounds)
+                ? payload.rounds.map((round) => this.normalizeRound(round))
+                : [],
+            batchSpins: Array.isArray(payload?.batchSpins)
+                ? payload.batchSpins.map((spin) => ({
+                    ...spin,
+                    rounds: Array.isArray(spin?.rounds)
+                        ? spin.rounds.map((round) => this.normalizeRound(round))
+                        : [],
+                }))
+                : [],
+        };
+    }
+
+    private normalizeRound(round: any) {
+        return {
+            ...round,
+            grid: Array.isArray(round?.grid)
+                ? round.grid.map((column) => Array.isArray(column)
+                    ? column.map((cell) => this.normalizeCell(cell))
+                    : [])
+                : [],
+            above: Array.isArray(round?.above)
+                ? round.above.map((column) => Array.isArray(column)
+                    ? column.map((cell) => this.normalizeCell(cell))
+                    : [])
+                : [],
+            flips: Array.isArray(round?.flips) ? round.flips : [],
+            win: {
+                ...(round?.win ?? {}),
+                positions: Array.isArray(round?.win?.positions) ? round.win.positions : [],
+                ways: Array.isArray(round?.win?.ways) ? round.win.ways : [],
+                stepWin: Number(round?.win?.stepWin ?? 0),
+            },
+            multiplier: Number(round?.multiplier ?? 1),
+            hasNext: !!round?.hasNext,
+        };
+    }
+
+    private normalizeCell(cell: any) {
+        if (!cell || typeof cell !== 'object') {
+            return cell;
+        }
+
+        return {
+            ...cell,
+            i: Number(cell.i ?? cell.face ?? cell.symbol ?? 0),
+            f: Number(cell.f ?? SymbolFrameState.NORMAL),
+        };
+    }
+
     extractBalanceFromPayload(payload: any): number | null {
 
         if (!payload) {
@@ -160,94 +275,41 @@ export class GameManager extends Component {
 
     indexCurrentReel = 0
     public async PlaySpin() {
-        // TextBoxCombo.instant.box.setAnimation(0, "textBox1_idle", true)
+        try {
+            const betConfig = this.getSpinBetConfig();
+            const spinResult = await NetworkService.getInstance().spin({
+                bet: betConfig.bet,
+                betSize: betConfig.betSize,
+                betLevel: betConfig.betLevel,
+            });
 
-        // // If this is the first round, fetch spin result from server
-        // if (this.indexCurrentReel === 0) {
-        //     const useServerSpin = GameConfig.useServerSpin; // Read from config
-        //     if (useServerSpin === false) {
-        //         // Convert callback to Promise and await it
-        //         await new Promise<void>((resolve, reject) => {
-        //             resources.load('test-spin-data', JsonAsset, (err, jsonAsset) => {
-        //                 if (err) {
-        //                     console.error("[GameManager] Failed to load test data:", err);
-        //                     Spin.instance.ActiveSpin();
-        //                     reject(err);
-        //                     return;
-        //                 }
-        //                 const spinResult = jsonAsset.json;
-        //                 console.log("[GameManager] Using TEST data:", spinResult);
+            this.applySpinResult(spinResult);
 
-        //                 if (spinResult.success) {
-        //                     this.sampleJson = spinResult;
-        //                     console.log("[GameManager] Updated sampleJson with TEST data");
-
-        //                     // Update balance
-        //                     UserInfo.getInstance().updateBalance(UserInfo.getInstance().balance - this.betCurrent + spinResult.totalWin);
-        //                     this.updateBalanceDisplay();
-        //                     resolve();
-        //                 } else {
-        //                     console.error("[GameManager] Test data invalid");
-        //                     if (this.isFreeSpin == true) return
-
-        //                     Spin.instance.ActiveSpin();
-        //                     reject(new Error("Invalid test data"));
-        //                 }
-        //             });
-        //         });
-        //     } else {
-        //         try {
-        //             // Get WebSocketService instance, try to find it if null
-        //             let wsService = WebSocketService.getInstance();
-        //             if (!wsService) {
-        //                 console.warn("[GameManager] WebSocketService instance is null, trying to find persisted node");
-        //                 const wsNode = director.getScene().getChildByName('WebSocketService');
-        //                 if (wsNode) {
-        //                     wsService = wsNode.getComponent(WebSocketService);
-        //                     console.log("[GameManager] Found WebSocketService from persisted node");
-        //                 }
-        //             }
-
-        //             if (!wsService) {
-        //                 console.error("[GameManager] WebSocketService not available");
-        //                 if (this.isFreeSpin == true) return
-
-        //                 Spin.instance.ActiveSpin();
-        //                 return;
-        //             }
-
-        //             const spinResult = await wsService.spin(this.betCurrent);
-        //             console.log("[GameManager] Spin result received:", spinResult);
-
-        //             if (spinResult.success) {
-        //                 this.sampleJson = spinResult;
-        //                 console.log("[GameManager] Updated sampleJson with server data");
-
-        //                 // Update balance
-        //                 UserInfo.getInstance().updateBalance(UserInfo.getInstance().balance - this.betCurrent + spinResult.totalWin);
-        //                 this.updateBalanceDisplay();
-        //             } else {
-        //                 console.error("[GameManager] Spin failed:", spinResult.error);
-        //                 if (this.isFreeSpin == true) return
-        //                 Spin.instance.ActiveSpin();
-        //                 return;
-        //             }
-        //         } catch (error) {
-        //             console.error("[GameManager] Spin API error:", error);
-        //             if (this.isFreeSpin == true) return
-        //             Spin.instance.ActiveSpin();
-        //             return;
-        //         }
-        //     }
-        // }
+            try {
+                const profile = await NetworkService.getInstance().getProfile();
+                UserInfo.getInstance().updateProfile(profile);
+            } catch (profileError) {
+                console.warn('[GameManager] Refresh profile after spin failed:', profileError);
+            }
+        } catch (error) {
+            console.error('[GameManager] Spin API error:', error);
+            if (this.isFreeSpin == true) return
+            Spin.instance.ActiveSpin();
+            return;
+        }
 
         this.SpinGame()
     }
 
     stepOld = 1
     SpinGame() {
+        if (!this.sampleJson || !Array.isArray(this.sampleJson.rounds) || this.sampleJson.rounds.length === 0) {
+            console.error('[GameManager] Missing spin result');
+            Spin.instance.ActiveSpin();
+            return;
+        }
+
         MultiplierCarouselFinal.instance.resetCombo()
-        this.sampleJson = sampleJson
         this.stepWinCurrent = 0
         this.UpdateStepWIn(0)
         // TextBoxCombo.instant.playRandomText()
@@ -473,7 +535,9 @@ export class GameManager extends Component {
             if (this.CheckScratch4() == true) {
                 this.indexCurrentReel = 0
                 this.isFreeSpin = true
-                FreeSpines.instance.playAnimation(this.getFreeSpin(this.GetNumberScratch()));
+                const freeSpinCount = this.dataFreespin?.payload?.batchSpins?.length ?? this.getFreeSpin(this.GetNumberScratch());
+                this.totalFreeSpin = freeSpinCount;
+                FreeSpines.instance.playAnimation(freeSpinCount);
             }
             else {
                 if (this.isFreeSpin == true) {

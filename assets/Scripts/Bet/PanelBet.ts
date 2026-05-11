@@ -105,6 +105,7 @@ export class PanelBet extends Component {
         this.csBetAmount.node.on("value_changed", this.onAmountChanged, this)
 
         this.commitToLabelBet();
+        this.syncGameManager();
 
     }
 
@@ -118,11 +119,12 @@ export class PanelBet extends Component {
     }
 
     commitToLabelBet() {
-        // this.labelBet.updateFromPanelBet();
+        this.syncGameManager();
     }
 
     onBetChanged(v, cs) {
         this.csBetAmount.value = this.csBetSize.value * this.csBetLevel.value * this.csBetBase.value;
+        this.syncGameManager();
     }
 
     onAmountChanged(v) {
@@ -132,6 +134,7 @@ export class PanelBet extends Component {
                 if (amount == v) {
                     this.csBetSize.index = i;
                     this.csBetLevel.index = j;
+                    this.syncGameManager();
                     return;
                 }
             }
@@ -152,7 +155,11 @@ export class PanelBet extends Component {
 
     BtnXacNhan() {
         this.labelBet2.string = currencyFormatSimple.format(this.betAmount)
-        GameManager.instance.UpdateBetCurrent(this.betAmount)
+        GameManager.instance.UpdateBetConfig(this.betAmount, this.betSize, this.betLevel, this.betBetbase)
+    }
+
+    private syncGameManager(): void {
+        GameManager.instance?.UpdateBetConfig(this.betAmount, this.betSize, this.betLevel, this.betBetbase);
     }
 }
 

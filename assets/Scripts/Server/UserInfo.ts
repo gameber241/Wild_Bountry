@@ -17,31 +17,34 @@ export class UserInfo {
     }
 
     public updateProfile(data: any): void {
-        // console.log('[UserInfo] ===== UPDATE PROFILE CALLED =====');
-        // console.log('[UserInfo] Received data:', JSON.stringify(data, null, 2));
+        const profileData = data?.data || data;
+        const user = profileData?.user || profileData;
+        const wallets = Array.isArray(profileData?.wallets) ? profileData.wallets : [];
+        const primaryWallet = wallets[0] || null;
 
-        // Unwrap the data if it has success/data structure
-        const profileData = data.data || data;
+        if (user?.id !== undefined || user?.userId !== undefined) {
+            this.userId = Number(user.id ?? user.userId);
+        }
+        if (user?.username) this.username = user.username;
+        if (primaryWallet?.balance !== undefined) {
+            this.balance = Number(primaryWallet.balance);
+        } else if (user?.balance !== undefined) {
+            this.balance = Number(user.balance);
+        } else if (profileData?.balance !== undefined) {
+            this.balance = Number(profileData.balance);
+        }
+        if (primaryWallet?.free_spins !== undefined) {
+            this.freeSpins = Number(primaryWallet.free_spins);
+        } else if (profileData?.freeSpins !== undefined) {
+            this.freeSpins = Number(profileData.freeSpins);
+        } else if (profileData?.free_spins !== undefined) {
+            this.freeSpins = Number(profileData.free_spins);
+        }
+        if (user?.partner_id !== undefined || user?.partnerId !== undefined) {
+            this.partnerId = Number(user.partner_id ?? user.partnerId);
+        }
 
-        // console.log('[UserInfo] profileData.userId:', profileData.userId);
-        // console.log('[UserInfo] profileData.username:', profileData.username);
-        // console.log('[UserInfo] profileData.balance:', profileData.balance);
-        // console.log('[UserInfo] profileData.freeSpins:', profileData.freeSpins);
-        // console.log('[UserInfo] profileData.partnerId:', profileData.partnerId);
-
-        if (profileData.userId) this.userId = Number(profileData.userId);
-        if (profileData.username) this.username = profileData.username;
-        if (profileData.balance !== undefined) this.balance = Number(profileData.balance);
-        if (profileData.freeSpins !== undefined) this.freeSpins = Number(profileData.freeSpins);
-        if (profileData.partnerId) this.partnerId = Number(profileData.partnerId);
-
-        // console.log('[UserInfo] Profile updated - Final state:', {
-        //     userId: this.userId,
-        //     username: this.username,
-        //     balance: this.balance,
-        //     freeSpins: this.freeSpins,
-        //     partnerId: this.partnerId
-        // });
+        director.emit("UPDATE_BALLANCE", this.balance.toFixed(2));
     }
 
     public updateBalance(newBalance: number): void {

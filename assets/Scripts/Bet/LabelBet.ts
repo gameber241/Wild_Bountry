@@ -33,12 +33,12 @@ export class LabelBet extends Component {
 
     protected onEnable(): void {
         this.bet = this.node.getComponent(Label)
-        this.bet.string = GameManager.instance.betCurrent.toString()
+        this.bet.string = currencyFormatSimple.format(GameManager.instance.betCurrent)
         director.on("BET_CURRENT", this.UpdateBet, this)
     }
 
     UpdateBet(bet) {
-        this.bet.string = bet.toString()
+        this.bet.string = currencyFormatSimple.format(Number(bet))
 
     }
 
@@ -52,6 +52,7 @@ export class LabelBet extends Component {
         if (index < list.length - 1) {
             index++;
             this.betAmount = list[index];
+            panel.csBetAmount?.scrollToValue(this.betAmount);
             this.messageBox.hideMessage();
         } else {
             this.messageBox.showMessage("Mức cược tối đa");
@@ -71,6 +72,7 @@ export class LabelBet extends Component {
         if (index > 0) {
             index--;
             this.betAmount = list[index];
+            panel.csBetAmount?.scrollToValue(this.betAmount);
             this.messageBox.hideMessage();
         } else {
             this.messageBox.showMessage("Mức cược tối thiểu");
