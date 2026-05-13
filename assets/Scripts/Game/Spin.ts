@@ -13,6 +13,9 @@ export class Spin extends Component {
 
     @property(sp.Skeleton)
     animRotate: sp.Skeleton = null
+
+    @property(Label)
+    lbAuto: Label = null
     public static instance: Spin
 
     protected onLoad(): void {
@@ -45,40 +48,35 @@ export class Spin extends Component {
         this.animRotate.node.active = true
         this.animSpinPlay.node.active = false
         this.animBg.node.active = true
-
         this.animBg.setAnimation(0, "idle", true)
-        // this.animRotate.setAnimation(0, "idle_rotate", true)
-
+        this.lbAuto.node.active = false
     }
 
     PlayIdleHover() {
         this.animRotate.node.active = true
         this.animSpinPlay.node.active = false
         this.animBg.node.active = true
-
         this.animBg.setAnimation(0, "idle_touch", true)
-        // this.animRotate.setAnimation(0, "idle_rotate", true)
+        this.lbAuto.node.active = false
 
     }
 
 
     PlayIdleAuto() {
-        this.animRotate.node.active = true
+        this.animRotate.node.active = false
         this.animSpinPlay.node.active = false
         this.animBg.node.active = true
-
         this.animBg.setAnimation(0, "auto_idle", true)
-        // this.animRotate.setAnimation(0, "idle_rotate", true)
+        this.lbAuto.node.active = true
 
     }
 
     PlayIdleHoverAuto() {
-        this.animRotate.node.active = true
+        this.animRotate.node.active = false
         this.animSpinPlay.node.active = false
         this.animBg.node.active = true
-
         this.animBg.setAnimation(0, "auto_touch", true)
-        // this.animRotate.setAnimation(0, "idle_rotate", true)
+        this.lbAuto.node.active = true
 
     }
 
@@ -89,21 +87,22 @@ export class Spin extends Component {
         this.animRotate.node.active = false
         this.animSpinPlay.node.active = true
         this.animBg.node.active = true
-        this.animSpinPlay.setAnimation(0, "action_start", false)
-        // this.animSpinPlay.addAnimation(0, "action_loop", false)
-        // this.animSpinPlay.addAnimation(0, "idle", true)
 
-        this.animSpinPlay.setCompleteListener((tracking) => {
-            if (tracking.animation.name == "action_start") {
-                this.isIdle = false
-                if (this.isAuto) {
-                    this.PlayIdleAuto()
-                }
-                else {
+
+        if (this.isAuto == false) {
+            this.animSpinPlay.setAnimation(0, "action_start", false)
+            this.animSpinPlay.setCompleteListener((tracking) => {
+                if (tracking.animation.name == "action_start") {
+                    this.isIdle = false
                     this.PlayIdle()
                 }
-            }
-        })
+            })
+        }
+        else {
+            this.PlayIdleAuto()
+            this.lbAuto.node.active = true
+        }
+
         GameManager.instance.PlaySpin()
     }
 
@@ -127,8 +126,8 @@ export class Spin extends Component {
         }
         this.isAuto = true
         this.autoCount = number
-        // this.skeletonSpin.node.active = false
-        this.animSpinPlay.setAnimation(0, "auto_idle")
+        this.lbAuto.string = this.autoCount.toString()
+        this.PlayIdleAuto()
         this.StartSpin()
     }
 
@@ -139,13 +138,14 @@ export class Spin extends Component {
             return
         }
         this.autoCount--
+        this.lbAuto.string = this.autoCount.toString()
         this.StartSpin()
     }
 
     StopAuto() {
         this.isAuto = false
         this.animSpinPlay.node.active = true
-        this.animSpinPlay.setAnimation(0, "idle", true)
+
     }
 
     // ================= FX =================
