@@ -1,5 +1,5 @@
 import { _decorator, Color, Component, Label, Node } from 'cc';
-import { H_story } from './History';
+import { History } from './History';
 const { ccclass, property } = _decorator;
 
 @ccclass('SelectDateRange')

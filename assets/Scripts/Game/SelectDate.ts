@@ -1,5 +1,5 @@
 import { _decorator, Component, Label, Node, Prefab, instantiate } from 'cc';
-import { H_story } from './History';
+import { History } from './History';
 import { GameManager } from '../Manager/GameManager';
 const { ccclass, property } = _decorator;
 

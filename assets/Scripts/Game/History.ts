@@ -3,8 +3,8 @@ import { DetailHistory } from './DetailHistory';
 import { NetworkService } from '../Server/NetworkService';
 const { ccclass, property } = _decorator;
 const pad = (n: number) => (n < 10 ? '0' + n : '' + n);
-@ccclass('H_story')
-export class H_story extends Component {
+@ccclass('History')
+export class History extends Component {
 
     @property(Prefab)
     itemHis: Prefab = null
