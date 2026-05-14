@@ -13,6 +13,10 @@ class NetworkServiceImpl {
     private profileTimeout: ReturnType<typeof setTimeout> | null = null;
     private activeSpinRequest: PendingRequest | null = null;
     private spinTimeout: ReturnType<typeof setTimeout> | null = null;
+    private activeLogsRequest: PendingRequest | null = null;
+    private logsTimeout: ReturnType<typeof setTimeout> | null = null;
+    private activeLogDetailRequest: PendingRequest | null = null;
+    private logDetailTimeout: ReturnType<typeof setTimeout> | null = null;
 
     hasToken(): boolean {
         return !!this.token;
@@ -26,6 +30,8 @@ class NetworkServiceImpl {
         this.token = token;
         this.clearProfileState();
         this.clearSpinState();
+        this.clearLogsState();
+        this.clearLogDetailState();
 
         if (this.ws) {
             try {
@@ -158,6 +164,81 @@ class NetworkServiceImpl {
         });
     }
 
+    async getLogs(options: {
+        limit?: number;
+        offset?: number;
+        skip?: number;
+        sort?: string;
+        dateFrom?: string;
+        dateTo?: string;
+    }): Promise<any> {
+        await this.ensureConnected();
+
+        return new Promise((resolve, reject) => {
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                reject(new Error('WebSocket chưa sẵn sàng'));
+                return;
+            }
+
+            if (this.activeLogsRequest) {
+                reject(new Error('Đang tải danh sách lịch sử'));
+                return;
+            }
+
+            this.activeLogsRequest = { resolve, reject };
+            this.logsTimeout = setTimeout(() => {
+                if (!this.activeLogsRequest) {
+                    return;
+                }
+                const pending = this.activeLogsRequest;
+                this.clearLogsState();
+                pending.reject(new Error('getLogs timeout'));
+            }, 10000);
+
+            this.ws.send(JSON.stringify({
+                type: 'getLogs',
+                payload: {
+                    ...options,
+                    gameID: GameConfig.gameId,
+                },
+            }));
+        });
+    }
+
+    async getLogDetail(id: string): Promise<any> {
+        await this.ensureConnected();
+
+        return new Promise((resolve, reject) => {
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                reject(new Error('WebSocket chưa sẵn sàng'));
+                return;
+            }
+
+            if (this.activeLogDetailRequest) {
+                reject(new Error('Đang tải chi tiết lịch sử'));
+                return;
+            }
+
+            this.activeLogDetailRequest = { resolve, reject };
+            this.logDetailTimeout = setTimeout(() => {
+                if (!this.activeLogDetailRequest) {
+                    return;
+                }
+                const pending = this.activeLogDetailRequest;
+                this.clearLogDetailState();
+                pending.reject(new Error('getLogDetail timeout'));
+            }, 10000);
+
+            this.ws.send(JSON.stringify({
+                type: 'getLogDetail',
+                payload: {
+                    id,
+                    gameID: GameConfig.gameId,
+                },
+            }));
+        });
+    }
+
     private handleSocketMessage(event: MessageEvent): void {
         let data: any;
 
@@ -187,6 +268,30 @@ class NetworkServiceImpl {
             return;
         }
 
+        if (data.type === 'getLogsResult' && this.activeLogsRequest) {
+            const pending = this.activeLogsRequest;
+            this.clearLogsState();
+            const payload = data.payload || data;
+            if (payload?.success === false) {
+                pending.reject(new Error(payload.error || 'Không thể lấy lịch sử'));
+                return;
+            }
+            pending.resolve(payload);
+            return;
+        }
+
+        if (data.type === 'getLogDetailResult' && this.activeLogDetailRequest) {
+            const pending = this.activeLogDetailRequest;
+            this.clearLogDetailState();
+            const payload = data.payload || data;
+            if (payload?.success === false) {
+                pending.reject(new Error(payload.error || 'Không thể lấy chi tiết lịch sử'));
+                return;
+            }
+            pending.resolve(payload);
+            return;
+        }
+
         if (data.type === 'error') {
             const message = data.error || data.message || 'Server error';
 
@@ -200,6 +305,18 @@ class NetworkServiceImpl {
                 const pendingSpin = this.activeSpinRequest;
                 this.clearSpinState();
                 pendingSpin.reject(new Error(message));
+            }
+
+            if (this.activeLogsRequest) {
+                const pendingLogs = this.activeLogsRequest;
+                this.clearLogsState();
+                pendingLogs.reject(new Error(message));
+            }
+
+            if (this.activeLogDetailRequest) {
+                const pendingLogDetail = this.activeLogDetailRequest;
+                this.clearLogDetailState();
+                pendingLogDetail.reject(new Error(message));
             }
         }
     }
@@ -219,6 +336,18 @@ class NetworkServiceImpl {
             this.clearSpinState();
             pendingSpin.reject(new Error('Kết nối máy chủ bị đóng'));
         }
+
+        if (this.activeLogsRequest) {
+            const pendingLogs = this.activeLogsRequest;
+            this.clearLogsState();
+            pendingLogs.reject(new Error('Kết nối máy chủ bị đóng'));
+        }
+
+        if (this.activeLogDetailRequest) {
+            const pendingLogDetail = this.activeLogDetailRequest;
+            this.clearLogDetailState();
+            pendingLogDetail.reject(new Error('Kết nối máy chủ bị đóng'));
+        }
     }
 
     private clearProfileState(): void {
@@ -235,6 +364,22 @@ class NetworkServiceImpl {
             this.spinTimeout = null;
         }
         this.activeSpinRequest = null;
+    }
+
+    private clearLogsState(): void {
+        if (this.logsTimeout) {
+            clearTimeout(this.logsTimeout);
+            this.logsTimeout = null;
+        }
+        this.activeLogsRequest = null;
+    }
+
+    private clearLogDetailState(): void {
+        if (this.logDetailTimeout) {
+            clearTimeout(this.logDetailTimeout);
+            this.logDetailTimeout = null;
+        }
+        this.activeLogDetailRequest = null;
     }
 }
 
