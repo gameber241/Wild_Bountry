@@ -43,7 +43,7 @@ export class ListReel extends Component {
                 reel.FIRST_VISIBLE = 3;
                 reel.VISIBLE_COUNT = 3
                 reel.numberSymbols = 9
-                reel.symbolPadding = 20
+                reel.symbolPadding = 10
                 break;
             case 1:
                 reel.posX = -176
@@ -79,7 +79,7 @@ export class ListReel extends Component {
                 reel.FIRST_VISIBLE = 3;
                 reel.VISIBLE_COUNT = 3
                 reel.numberSymbols = 9
-                reel.symbolPadding = 20
+                reel.symbolPadding = 10
                 break;
         }
     }

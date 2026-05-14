@@ -51,9 +51,7 @@ export class Symbol extends Component {
 
     @property({ type: Enum(SymbolType) })
     face: SymbolType = SymbolType.A;
-
-    @property({ type: Enum(SymbolFrameState) })
-    frameState: SymbolFrameState = SymbolFrameState.NORMAL;
+    frameState = ""
     @property(sp.Skeleton) icon: sp.Skeleton = null!;
     @property(sp.Skeleton) frame: sp.Skeleton = null!;
     reel: ReelBase = null!;
@@ -128,7 +126,7 @@ export class Symbol extends Component {
     }
 
     playFrameAnimation(name: string, loop: boolean) {
-        if (this.frameState == SymbolFrameState.GOLD) {
+        if (this.frameState == "g") {
             this.frame.setSkin("Gold_Frame")
         }
         this.frame?.setAnimation(0, name, loop);
@@ -136,7 +134,7 @@ export class Symbol extends Component {
     }
 
     UpdateFrame() {
-        if (this.frameState == SymbolFrameState.GOLD) {
+        if (this.frameState == "g") {
             this.frame.enabled = true
             this.playFrameAnimation(this.getNameIdle(), true);
 
@@ -159,10 +157,10 @@ export class Symbol extends Component {
         this.playFrameAnimation(name, true);
     }
 
-    InitSymbol(data: SymbolCell) {
+    InitSymbol(data) {
         this.isInit = true;
         this.face = data.i;
-        this.frameState = data.f;
+        this.frameState = data.t;
 
 
         this.SetUISymbolNormal();
@@ -189,7 +187,7 @@ export class Symbol extends Component {
             SymbolType.J,
         ];
         this.face = faces[Math.floor(Math.random() * faces.length)];
-        this.frameState = SymbolFrameState.NORMAL;
+        this.frameState = "n";
         this.icon.node.off(Input.EventType.TOUCH_END, this.ShowInf, this)
 
     }
@@ -281,8 +279,8 @@ export class Symbol extends Component {
     FlipSymbol(data) {
         this.AnimationWin()
         this.isInit = true;
-        this.face = data.i;
-        this.frameState = data.f;
+        this.face = 0;
+        this.frameState = "n";
         this.UpdateFrame();
         tween(this.icon.node)
             .to(0.1, { scale: new Vec3(0, 0, 0) })
@@ -293,20 +291,34 @@ export class Symbol extends Component {
             .start()
     }
 
-    Dispose() {
-        this.node.setSiblingIndex(100)
+    public async Dispose(): Promise<void> {
+        this.node.setSiblingIndex(100);
         this.playiconAnimation(this.getNameWin(), false);
-        this.scheduleOnce(() => {
-            director.off("HIDE_INF", this.hideInf, this)
-            const idx = this.reel.listSymbol.findIndex(e => e === this.node);
-            if (idx !== -1) {
-                this.reel.listSymbol.splice(idx, 1);
-            }
-            this.node.destroy();
-            GameManager.instance.symBolArray[this.col][this.row] = null
-        }, 1);
 
+        // Chờ animation win kết thúc
+        await GameManager.waitForSeconds(1);
 
+        // Nếu node đã bị hủy thì bỏ qua
+        if (!this.node || !this.node.isValid) {
+            return;
+        }
+
+        director.off("HIDE_INF", this.hideInf, this);
+
+        // Xóa khỏi listSymbol
+        const idx = this.reel.listSymbol.findIndex(e => e === this.node);
+        if (idx !== -1) {
+            this.reel.listSymbol.splice(idx, 1);
+        }
+
+        // Xóa khỏi grid
+        if (GameManager.instance?.symBolArray?.[this.col]) {
+            GameManager.instance.symBolArray[this.col][this.row] = null;
+        }
+
+        // Destroy node
+        this.node.destroy();
+        console.log(this)
     }
 
     HideAll() { this.EnabledAniamtion(false); }

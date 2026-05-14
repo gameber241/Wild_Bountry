@@ -404,6 +404,7 @@ export class GameManager extends Component {
             this.scheduleOnce(() => {
                 tween(this.cameraMain).to(0.5, { orthoHeight: this.otherHeight })
                     .call(() => {
+                        ListReel.instance.HideMaskEffect()
                         this.ClearData()
                     })
                     .start()
@@ -448,15 +449,15 @@ export class GameManager extends Component {
     }
 
     FlipData() {
-        let dataRound = this.sampleJson.rounds[this.indexCurrentReel].flips;
+        let dataRound = this.sampleJson.rounds[this.indexCurrentReel].win.wild;
         this.scheduleOnce(() => {
             // SoundToggle.instance.PlayChangeSymbol()
 
         }, 0.7)
         dataRound.forEach(e => {
-            const symbol = this.resolveSymbolByPosition(e.from.c, e.from.r);
+            const symbol = this.resolveSymbolByPosition(e.c, e.r);
             if (!symbol) return;
-            symbol.FlipSymbol(e.to);
+            symbol.FlipSymbol(e);
         });
     }
 
@@ -472,24 +473,34 @@ export class GameManager extends Component {
             this.UpdateStepWIn(this.stepWinCurrent)
             this.removeWinDuplicateFlip(r)
             const flipPos = new Set(
-                r.win.wild.map(f => `${f.from.c}_${f.from.r}`)
+                r.win.wild.map(f => `${f.c}_${f.r}`)
             );
             let disposeCount = 0;
+            const disposeTasks: Promise<void>[] = [];
+
             for (const e of r.win.normal) {
                 const key = `${e.c}_${e.r}`;
                 if (flipPos.has(key)) {
-
                     continue;
                 }
+
                 const symbol = this.resolveSymbolByPosition(e.c, e.r, e.i);
                 if (!symbol) {
                     continue;
                 }
+
+                // Tạo delay 0.05s giữa thời điểm bắt đầu Dispose
                 await GameManager.waitForSeconds(0.05);
-                symbol.Dispose();
+
+                // KHÔNG await ở đây.
+                // Dispose bắt đầu ngay, animation chạy song song với các symbol khác.
+                disposeTasks.push(symbol.Dispose());
+
                 disposeCount++;
             }
 
+            // Chờ tất cả symbol destroy xong hoàn toàn rồi mới chạy bước tiếp theo
+            await Promise.all(disposeTasks);
             // SoundToggle.instance.PlaySymbolWin()
             this.stepOld = this.sampleJson.rounds[this.indexCurrentReel].multiplier
             MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
@@ -497,25 +508,29 @@ export class GameManager extends Component {
 
             await GameManager.waitForSeconds(1.1);
             ListReel.instance.HideMaskEffect()
-
-            if (r.flips.length > 0) {
+            if (r.win.wild.length > 0) {
                 this.FlipData();
-                await GameManager.waitForSeconds(2);
             }
+
             // Chỉ gọi AnimationWin cho các symbol thực sự win
-            r.win.positions.forEach(pos => {
+            r.win.normal.forEach(pos => {
                 const symbol = this.resolveSymbolByPosition(pos.c, pos.r, pos.i);
                 if (symbol) {
                     symbol.AnimationWin();
                 }
             });
-            this.reels.forEach((reel, i) => {
-                if (r.above[i] && r.above[i].length > 0) {
-                    reel.cascadeDrop(r.above[i]);
-                }
-            });
 
-            await GameManager.waitForSeconds(2);
+            // Chờ tất cả reel cascade hoàn tất
+            const tasks: Promise<void>[] = [];
+
+            for (let i = 0; i < this.reels.length; i++) {
+                if (r.above[i] && r.above[i].length > 0) {
+                    tasks.push(this.reels[i].cascadeDrop(r.above[i]));
+                }
+            }
+
+            await Promise.all(tasks);
+            await GameManager.waitForSeconds(1);
         }
         if (r.hasNext) {
             this.indexCurrentReel++;

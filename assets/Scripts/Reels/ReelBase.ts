@@ -16,7 +16,7 @@ export abstract class ReelBase {
     protected totalSize = 0;
     protected halfSize = 0;
 
-    _delay = 0.06;
+    _delay = 0.05;
     protected _isStopping = false;
     protected _remainSteps = 0;
 
@@ -70,45 +70,132 @@ export abstract class ReelBase {
             s.node.position = this.getSymbolPosition(s.reelIndex);
         }
     }
+    private normalizeSymbolCount() {
+        // Loại bỏ node đã bị destroy
+        this.listSymbol = this.listSymbol.filter(node => node && node.isValid);
+        this.symbols = this.symbols.filter(symbol => symbol && symbol.node && symbol.node.isValid);
+
+        // Đồng bộ symbols từ listSymbol để tránh lệch mảng
+        this.symbols = [];
+        for (const node of this.listSymbol) {
+            const symbol = node.getComponent(Symbol);
+            if (symbol) {
+                symbol.reel = this;
+                this.symbols.push(symbol);
+            }
+        }
+
+        // -------------------------------------------------
+        // Nếu THIẾU symbol -> tạo thêm
+        // -------------------------------------------------
+        while (this.symbols.length < this.numberSymbols) {
+            const symbol = this.createNewSymbol();
+
+            symbol.reel = this;
+            symbol.reelIndex = this.symbols.length;
+
+            // Reset để có icon hợp lệ
+            symbol.ResetSymbol();
+
+            // Đặt ở vị trí phía trên reel (index = -1)
+            symbol.node.setPosition(this.getSymbolPosition(-1));
+            symbol.node.active = true;
+
+            this.listSymbol.push(symbol.node);
+            this.symbols.push(symbol);
+
+            console.warn(
+                `➕ Added missing symbol: ${this.symbols.length}/${this.numberSymbols}`
+            );
+        }
+
+        // -------------------------------------------------
+        // Nếu THỪA symbol -> xóa bớt từ cuối mảng
+        // -------------------------------------------------
+        while (this.symbols.length > this.numberSymbols) {
+            const symbol = this.symbols.pop();
+            if (!symbol || !symbol.node || !symbol.node.isValid) {
+                continue;
+            }
+
+            const idx = this.listSymbol.indexOf(symbol.node);
+            if (idx !== -1) {
+                this.listSymbol.splice(idx, 1);
+            }
+
+            symbol.node.destroy();
+
+            console.warn(
+                `➖ Removed extra symbol: ${this.symbols.length}/${this.numberSymbols}`
+            );
+        }
+
+        // -------------------------------------------------
+        // Cập nhật reelIndex lại cho toàn bộ symbol
+        // -------------------------------------------------
+        for (let i = 0; i < this.symbols.length; i++) {
+            const symbol = this.symbols[i];
+            symbol.reel = this;
+            symbol.reelIndex = i;
+        }
+
+        // Cập nhật thông số kích thước
+        if (this.symbols.length > 0) {
+            const ui = this.symbols[0].node.getComponent(UITransform);
+            this.cellSize = this.getCellSize(ui) + this.symbolPadding;
+            this.totalSize = this.cellSize * this.symbols.length;
+            this.computeHalfSize();
+        }
+
+        console.log(
+            `✅ Reel ${this.possitionReel}: ${this.symbols.length}/${this.numberSymbols}`
+        );
+    }
 
 
     startRoll() {
-
         this._isStopping = false;
         this.isRolling = true;
-        this.collectSymbols();
+
+        // Chuẩn hóa số lượng symbol trước khi spin
+        this.normalizeSymbolCount();
+
         this.rearrangeSymbols();
+
         this.symbols.forEach(e => {
-            e.icon.node.layer = Layers.Enum.DEFAULT
-            e.frame.node.layer = Layers.Enum.DEFAULT
-            e.isInit = false
-            e.node.active = true
-        })
+            e.icon.node.layer = Layers.Enum.DEFAULT;
+            e.frame.node.layer = Layers.Enum.DEFAULT;
+            e.isInit = false;
+            e.node.active = true;
+        });
+
+        console.log(this.symbols.length);
+
         tween(this.reelProtect)
             .call(() => {
                 if (this.isRolling === false) return;
+
                 for (let s of this.symbols) {
-                    s.reelIndex += 1
+                    s.reelIndex += 1;
+
                     if (s.reelIndex >= this.symbols.length) {
                         s.reelIndex = 0;
+
                         if (!this._isStopping) {
                             s.ResetSymbol();
                         }
+
                         s.node.position = this.getSymbolPosition(-1);
                     }
 
                     s.rollToIndex(this._delay, Symbol.MoveType.MOVING);
-
                 }
-
             })
             .delay(this._delay)
-            .call(() => {
-            })
+            .call(() => { })
             .union()
             .repeatForever()
             .start();
-
     }
 
 
@@ -256,7 +343,7 @@ export abstract class ReelBase {
                 }
             }
         }
-        const createCount = Math.min(space, aboveData.length);
+        const createCount = space;
         for (let i = createCount - 1; i >= 0; i--) {
             let Symbol = this.createNewSymbol();
             Symbol.reelIndex = min + i;
