@@ -317,7 +317,7 @@ export class GameManager extends Component {
         Spin.instance.isSpin = true
         // Waymanager.instance.resetWay()
         const round = this.sampleJson.rounds[this.indexCurrentReel];
-
+        console.log(round)
         this.SetModeNormal();
         const grid = round.grid;
         this.GenerateMap(grid);
@@ -463,7 +463,7 @@ export class GameManager extends Component {
     stepWinCurrent = 0
     async ClearData() {
         const r = this.sampleJson.rounds[this.indexCurrentReel];
-        if (r.win.positions.length > 0) {
+        if (r.win.normal.length > 0) {
             ListReel.instance.ShowMaskEffect()
 
             // Waymanager.instance.animWay(r.win.ways)
@@ -472,10 +472,10 @@ export class GameManager extends Component {
             this.UpdateStepWIn(this.stepWinCurrent)
             this.removeWinDuplicateFlip(r)
             const flipPos = new Set(
-                r.flips.map(f => `${f.from.c}_${f.from.r}`)
+                r.win.wild.map(f => `${f.from.c}_${f.from.r}`)
             );
             let disposeCount = 0;
-            for (const e of r.win.positions) {
+            for (const e of r.win.normal) {
                 const key = `${e.c}_${e.r}`;
                 if (flipPos.has(key)) {
 
@@ -549,12 +549,6 @@ export class GameManager extends Component {
                     Spin.instance.ActiveSpin()
                     this.SetModeNormal();
                     // SoundToggle.instance.playNormal()
-                    if (Spin.instance.isAuto == true) {
-                        Spin.instance.AutoSpinNext()
-                    }
-                    else {
-                        Spin.instance.isSpin = false;
-                    }
                 }
 
             }

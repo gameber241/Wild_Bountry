@@ -137,7 +137,6 @@ export class Symbol extends Component {
 
     UpdateFrame() {
         if (this.frameState == SymbolFrameState.GOLD) {
-            console.log("den day")
             this.frame.enabled = true
             this.playFrameAnimation(this.getNameIdle(), true);
 
@@ -161,7 +160,6 @@ export class Symbol extends Component {
     }
 
     InitSymbol(data: SymbolCell) {
-        console.log(data)
         this.isInit = true;
         this.face = data.i;
         this.frameState = data.f;
@@ -301,7 +299,6 @@ export class Symbol extends Component {
         this.scheduleOnce(() => {
             director.off("HIDE_INF", this.hideInf, this)
             const idx = this.reel.listSymbol.findIndex(e => e === this.node);
-            console.log(this.reel.listSymbol, idx)
             if (idx !== -1) {
                 this.reel.listSymbol.splice(idx, 1);
             }

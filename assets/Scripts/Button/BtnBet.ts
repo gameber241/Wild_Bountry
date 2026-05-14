@@ -8,8 +8,6 @@ export class BtnBet extends Component {
     betUI: Node = null
 
     onClick() {
-        console.log("den day", Spin.instance.isSpin)
-
         // if (Spin.instance.isSpin == true) return;
         this.betUI.active = true;
     }

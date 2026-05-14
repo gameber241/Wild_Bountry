@@ -104,7 +104,6 @@ export abstract class ReelBase {
             })
             .delay(this._delay)
             .call(() => {
-                console.log("con nua")
             })
             .union()
             .repeatForever()
@@ -157,7 +156,6 @@ export abstract class ReelBase {
         // SoundToggle.instance?.PlaySymbolDrop();
     }
     changeSpeed(newDelay: number) {
-        console.log("den day ....")
         this._delay = newDelay;
         Tween.stopAllByTarget(this.reelProtect);
         this.startRoll();
