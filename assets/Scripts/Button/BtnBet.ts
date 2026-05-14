@@ -1,4 +1,4 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Button, Component, Node } from 'cc';
 import { Spin } from '../Game/Spin';
 const { ccclass, property } = _decorator;
 
@@ -10,6 +10,16 @@ export class BtnBet extends Component {
     onClick() {
         // if (Spin.instance.isSpin == true) return;
         this.betUI.active = true;
+    }
+
+    protected update(dt: number): void {
+        if (Spin.instance.isSpin == true) {
+            this.node.getComponent(Button).interactable = false
+        }
+        else {
+            this.node.getComponent(Button).interactable = true
+
+        }
     }
 }
 
