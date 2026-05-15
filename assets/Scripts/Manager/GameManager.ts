@@ -475,7 +475,7 @@ export class GameManager extends Component {
             // SoundToggle.instance.PlaySymbolWin()
             this.stepOld = this.sampleJson.rounds[this.indexCurrentReel].multiplier
             MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
-            TextBoxGame.instant.PlayStepWin(r.stepWin, this.stepOld)
+            TextBoxGame.instant.PlayStepWin(r.baseWin, this.stepOld)
             ListReel.instance.HideMaskEffect()
             await GameManager.waitForSeconds(0.7);
             if (r.win.wild.length > 0) {
@@ -520,9 +520,10 @@ export class GameManager extends Component {
             if (this.CheckScratch4() == true) {
                 this.indexCurrentReel = 0
                 this.isFreeSpin = true
-                const freeSpinCount = this.dataFreespin?.payload?.batchSpins?.length ?? this.getFreeSpin(this.GetNumberScratch());
-                this.totalFreeSpin = freeSpinCount;
-                FreeSpines.instance.playAnimation(freeSpinCount);
+                let free = this.getFreeSpin(this.GetNumberScratch())
+                FreeSpines.instance.playAnimation(free);
+                FreeSpines.instance.UpdateFreeSpinLb(free)
+
             }
             else {
                 if (this.isFreeSpin == true) {

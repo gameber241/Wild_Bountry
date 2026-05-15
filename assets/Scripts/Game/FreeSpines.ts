@@ -180,7 +180,6 @@ export class FreeSpines extends Component {
     @property(Node)
     text2: Node = null
     UpdateFreeSpinLb(round) {
-
         if (round == 0) {
             this.text2.active = true
             this.text1.active = false
