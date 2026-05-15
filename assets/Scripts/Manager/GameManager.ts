@@ -15,6 +15,7 @@ import { PanelBet } from '../Bet/PanelBet';
 import { SymbolFrameState } from '../Enum/SymbolFrameState';
 import { History } from '../Game/History';
 import { InfSymbol } from '../Game/InfSymbol';
+import { AudioManager } from '../Game/AudioManager';
 
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -315,14 +316,19 @@ export class GameManager extends Component {
     }
 
     async RollDataScratch(grid) {
+        AudioManager.instance.ReelStart()
         const indexReel = this.CheckReelFull3Scratch();
         if (indexReel === this.reels.length - 1) {
             this.RollDataNormal(grid);
             return;
         }
+        AudioManager.instance.ReelStart()
+
         for (let i = 0; i < this.reels.length; i++) {
             let current = i;
             this.reels[current].startRoll();
+            await GameManager.waitForSeconds(0.05);
+
         }
         await GameManager.waitForSeconds(this.GetTimeTurboScratchStart());
 
@@ -359,6 +365,7 @@ export class GameManager extends Component {
 
         while (current < this.reels.length) {
             const reel = this.reels[current];
+            AudioManager.instance.ReelSLow()
             reel.changeSpeed(0.2)
             ListReel.instance.ShowMaskEffect()
             this.ShowAllScratch(current)
@@ -446,7 +453,7 @@ export class GameManager extends Component {
 
             // Waymanager.instance.animWay(r.win.ways)
             ListReel.instance.maskEffect.active = true
-            this.stepWinCurrent += r.win.stepWin
+            this.stepWinCurrent += r.baseWin
             this.UpdateStepWIn(this.stepWinCurrent)
             this.removeWinDuplicateFlip(r)
             const flipPos = new Set(
@@ -454,7 +461,7 @@ export class GameManager extends Component {
             );
             let disposeCount = 0;
             const disposeTasks: Promise<void>[] = [];
-
+            AudioManager.instance.Win()
             for (const e of r.win.normal) {
                 const key = `${e.c}_${e.r}`;
                 if (flipPos.has(key)) {
@@ -467,7 +474,7 @@ export class GameManager extends Component {
                 }
 
                 // Tạo delay 0.05s giữa thời điểm bắt đầu Dispose
-                await GameManager.waitForSeconds(0.05);
+                await GameManager.waitForSeconds(0.07);
 
                 // KHÔNG await ở đây.
                 // Dispose bắt đầu ngay, animation chạy song song với các symbol khác.
@@ -554,25 +561,25 @@ export class GameManager extends Component {
         // danh sách animation cần chạy
         const winQueue: Array<() => void> = [];
         console.log(r, " check")
-        if (r.BigWin) {
+        if (this.stepWinCurrent > 10 * this.betCurrent) {
 
             winQueue.push(() => {
-                // SoundToggle.instance.playBigWin()
+                AudioManager.instance.PlayBigwin()
                 BigWin.instance.showBigWin(runNext, r.BigWin);
             });
         }
 
-        if (r.SuperWin) {
+        if (this.stepWinCurrent > 15 * this.betCurrent) {
 
             winQueue.push(() => {
-                // SoundToggle.instance.playBigWin()
+                AudioManager.instance.PlaySupperwin()
                 BigWin.instance.showSuperWin(runNext, r.SuperWin);
             });
         }
 
-        if (r.MegaWin) {
+        if (this.stepWinCurrent > 25 * this.betCurrent) {
             winQueue.push(() => {
-                // SoundToggle.instance.playBigWin()
+                AudioManager.instance.PlayMegaWin()
                 BigWin.instance.showMegaWin(runNext, r.MegaWin);
             });
         }
@@ -718,7 +725,7 @@ export class GameManager extends Component {
     GetTimeTurboScratchSpin() {
         if (this.turboMode == 0) {
             // SoundToggle.instance.PlayRollScatch()
-            return 2
+            return 3
         }
         if (this.turboMode == 1) {
             return 0
@@ -761,6 +768,8 @@ export class GameManager extends Component {
     PlayModeFreeSpin() {
         let dataFree = this.GetDataFreeSpin()
         if (dataFree == null) {
+            AudioManager.instance.PlayTotalWIn()
+
             FreeSpines.instance.ShowTotalSpin(() => {
                 this.indexCurrentFreeSpin = 0
                 this.isFreeSpin = false
@@ -835,7 +844,10 @@ export class GameManager extends Component {
     @property(Node)
     wayFree: Node = null
 
+
+
     SetModeNormal() {
+        AudioManager.instance.PlaybgNormal()
         this.bgReels.spriteFrame = this.bgReelsSp1[0]
         this.bgDown.active = true
         this.bgReels.node.setPosition(0, 117, 0)
@@ -849,6 +861,8 @@ export class GameManager extends Component {
 
 
     SetModeFreeSpin() {
+        AudioManager.instance.PlaybgFree()
+
         this.bgReels.spriteFrame = this.bgReelsSp1[1]
         this.bgDown.active = false
         this.bgReels.node.setPosition(0, 41, 0)

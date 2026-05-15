@@ -207,10 +207,6 @@ export class Symbol extends Component {
         if (type === Symbol.MoveType.MOVING) {
             this.SetUiMove()
         }
-        const easingType =
-            type === Symbol.MoveType.MOVING
-                ? "linear"
-                : "cubicOut";
 
         return tween(this.node)
             .to(time, { position: newPosition })

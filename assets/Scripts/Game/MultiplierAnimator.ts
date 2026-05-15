@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, Prefab, instantiate, Vec3, tween, Label, UIOpacity, Color, Font } from 'cc';
 import { GameManager } from '../Manager/GameManager';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 // ===== MODE =====
@@ -175,8 +176,7 @@ export class MultiplierCarouselFinal extends Component {
     }
 
     // ================= NEXT =================
-    public next() {
-
+    public next(onComplete?: () => void) {
         const MIN = this.getMinValue();
 
         let newValue = this.currentCenter * 2;
@@ -201,15 +201,29 @@ export class MultiplierCarouselFinal extends Component {
 
         const values = this.buildValues();
 
+        // Đếm số tween hoàn thành
+        let completed = 0;
+        const total = this.nodes.length;
+
         for (let i = 0; i < this.nodes.length; i++) {
             this.setValue(this.nodes[i], values[i]);
             this.setState(this.nodes[i], i, false, values[i]);
+
+            // Theo dõi tween của node cuối cùng
+            tween(this.nodes[i])
+                .delay(0.35) // bằng đúng thời gian tween trong setState()
+                .call(() => {
+                    completed++;
+                    if (completed >= total && onComplete) {
+                        onComplete();
+                    }
+                })
+                .start();
         }
     }
 
     // ================= FOCUS =================
     public focusTo(target: number) {
-
         if (target === this.currentCenter) return;
 
         const MIN = this.getMinValue();
@@ -226,15 +240,19 @@ export class MultiplierCarouselFinal extends Component {
             if (steps.length > 20) break;
         }
 
-        let delay = 0;
+        const playStep = (index: number) => {
+            if (index >= steps.length) return;
 
-        steps.forEach(() => {
-            this.scheduleOnce(() => {
-                this.next();
-            }, delay);
+            // Phát âm thanh trước khi animation bắt đầu
+            AudioManager.instance.MultiMove();
 
-            delay += 0.15;
-        });
+            // Chờ animation next() hoàn thành rồi mới chạy bước tiếp theo
+            this.next(() => {
+                playStep(index + 1);
+            });
+        };
+
+        playStep(0);
     }
 
     // ================= RESET =================

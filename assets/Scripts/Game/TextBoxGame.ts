@@ -13,6 +13,7 @@ import {
 } from 'cc';
 import { currencyFormatSimple } from '../Manager/GameManager';
 import { MultiplierCarouselFinal } from './MultiplierAnimator';
+import { AudioManager } from './AudioManager';
 
 const { ccclass, property } = _decorator;
 
@@ -156,6 +157,7 @@ export class TextBoxGame extends Component {
         this.comboAnim.node.parent!.active = false;
 
         if (multi === 1) {
+            AudioManager.instance.WinBatHit()
             this.stepWin.active = true;
             this.lbScore.string = currencyFormatSimple.format(step);
         }
@@ -188,9 +190,13 @@ export class TextBoxGame extends Component {
                         comboParent.active = false;
 
                         if (multi < 8) {
+                            AudioManager.instance.WinBat1()
+
                             this.box.setAnimation(0, 'lv1', false);
                         }
                         else {
+                            AudioManager.instance.WinBat2()
+
                             this.box.setAnimation(0, 'lv2', false);
                         }
                     })

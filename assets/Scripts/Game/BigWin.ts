@@ -1,5 +1,6 @@
 import { _decorator, Component, Input, Label, sp, Tween, tween } from 'cc';
 import { currencyFormatSimple } from '../Manager/GameManager';
+import { AudioManager } from './AudioManager';
 
 const { ccclass, property } = _decorator;
 
@@ -74,6 +75,7 @@ export class BigWin extends Component {
         // spine animation
         this.fxBigwin.setAnimation(0, appearAnim, false);
         this.fxBigwin.addAnimation(0, idleAnim, true);
+        AudioManager.instance.PlayScore()
 
         // play number
         this.playTo(value, 3, activeLabel, callback);
@@ -137,7 +139,7 @@ export class BigWin extends Component {
             this.node.off(Input.EventType.TOUCH_END, this.touchHandler, this);
             this.touchHandler = null;
         }
-
+        AudioManager.instance.SoundWin.volume = 0
         // delay giống slot
         this.scheduleOnce(() => {
 

@@ -1,6 +1,7 @@
 import { _decorator, Component, Input, Label, Node, sp, tween, Tween } from 'cc';
 import { currencyFormatSimple, GameManager } from '../Manager/GameManager';
 import { MultiplierCarouselFinal } from './MultiplierAnimator';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('FreeSpines')
@@ -98,6 +99,8 @@ export class FreeSpines extends Component {
         this.totlSpines.node.active = true
         this.totlSpines.setAnimation(0, "TotalWin_start", false)
         this.totlSpines.addAnimation(0, "TotalWin_loop", true)
+        AudioManager.instance.PlayScore()
+
         this.playTo(target, 3, this.totalLb, callback)
 
     }
@@ -147,6 +150,8 @@ export class FreeSpines extends Component {
 
     private complete(label: Label, callback?: Function) {
         // remove event
+        AudioManager.instance.SoundWin.volume = 0
+
         if (this.touchHandler) {
             this.node.off(Input.EventType.TOUCH_END, this.touchHandler, this);
             this.touchHandler = null;

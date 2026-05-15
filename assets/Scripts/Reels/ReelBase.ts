@@ -3,6 +3,7 @@ import { Symbol } from './Symbol';
 import { PrefabManager } from '../Manager/PrefabManager';
 import { GameManager, waitForSeconds } from '../Manager/GameManager';
 import { SymbolType } from '../Enum/ESymbolFace';
+import { AudioManager } from '../Game/AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('ReelBase')
@@ -237,9 +238,10 @@ export abstract class ReelBase {
 
         this.symbols.forEach(s => {
             s.reelIndex += visible;
-            s.rollToIndex(this._delay * 5, Symbol.MoveType.STOP);
+            s.rollToIndex(this._delay * 3.5, Symbol.MoveType.STOP);
         });
-
+        GameManager.waitForSeconds(5 * this._delay)
+        AudioManager.instance.ReelEnd()
         // SoundToggle.instance?.PlaySymbolDrop();
     }
     changeSpeed(newDelay: number) {

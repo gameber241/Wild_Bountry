@@ -1,5 +1,6 @@
 import { _decorator, Button, Component, Input, Label, Node, sp } from 'cc';
 import { GameManager } from '../Manager/GameManager';
+import { AudioManager } from './AudioManager';
 
 const { ccclass, property } = _decorator;
 
@@ -86,7 +87,7 @@ export class Spin extends Component {
         this.animSpinPlay.node.active = true
         this.animBg.node.active = true
 
-
+        AudioManager.instance.BtnSpin()
         if (this.isAuto == false) {
             this.animSpinPlay.setAnimation(0, "action_start", false)
             this.animSpinPlay.setCompleteListener((tracking) => {
