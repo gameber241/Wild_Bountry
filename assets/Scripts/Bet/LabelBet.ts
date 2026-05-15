@@ -11,87 +11,104 @@ export class LabelBet extends Component {
     @property(MessageBox)
     messageBox: MessageBox = null;
 
-    @property(CCFloat)
-    betAmount: number = 12;
-
-    @property(CCFloat)
-    stepBet: number = 4;
-
-    @property(CCFloat)
-    minBet: number = 4;
-
-    @property(CCFloat)
-    maxBet: number = 40;
-
     @property(Label)
     bet: Label = null
 
     protected start(): void {
-        this.updateFromPanelBet();
+        this.bet = this.node.getComponent(Label);
     }
 
-
     protected onEnable(): void {
-        this.bet = this.node.getComponent(Label)
-        this.bet.string = currencyFormatSimple.format(GameManager.instance.betCurrent)
-        director.on("BET_CURRENT", this.UpdateBet, this)
+        director.on("BET_CURRENT", this.UpdateBet, this);
+        this.scheduleOnce(() => {
+            this.updateFromPanelBet();
+        }, 0);
+    }
+
+    protected onDisable(): void {
+        director.off("BET_CURRENT", this.UpdateBet, this);
     }
 
     UpdateBet(bet) {
-        this.bet.string = currencyFormatSimple.format(Number(bet))
-
+        if (this.bet) {
+            this.bet.string = currencyFormatSimple.format(Number(bet))
+        }
     }
 
     increaseBet() {
-        const panel = PanelBet.instance;
+        const panel = PanelBet.getInstance();
         if (!panel) return;
 
+        panel.ensureBetState();
         const list = panel.betAmounts;
-        let index = list.indexOf(this.betAmount);
+        const currentAmount = panel.betAmount;
+        let currentIndex = list.indexOf(currentAmount);
+        
+        // Nếu không tìm thấy, tìm giá trị gần nhất
+        if (currentIndex === -1) {
+            let closest = 0;
+            let minDiff = Math.abs(list[0] - currentAmount);
+            for (let i = 1; i < list.length; i++) {
+                const diff = Math.abs(list[i] - currentAmount);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = i;
+                }
+            }
+            currentIndex = closest;
+        }
 
-        if (index < list.length - 1) {
-            index++;
-            this.betAmount = list[index];
-            panel.csBetAmount?.scrollToValue(this.betAmount);
+        if (currentIndex < list.length - 1) {
+            const newAmount = list[currentIndex + 1];
+            panel.onAmountChanged(newAmount);
             this.messageBox.hideMessage();
         } else {
             this.messageBox.showMessage("Mức cược tối đa");
         }
 
         this.node.getComponent(PopEffect)?.play();
-        this.updateLabel();
     }
 
     decreaseBet() {
-        const panel = PanelBet.instance;
+        const panel = PanelBet.getInstance();
         if (!panel) return;
 
+        panel.ensureBetState();
         const list = panel.betAmounts;
-        let index = list.indexOf(this.betAmount);
+        const currentAmount = panel.betAmount;
+        let currentIndex = list.indexOf(currentAmount);
+        
+        // Nếu không tìm thấy, tìm giá trị gần nhất
+        if (currentIndex === -1) {
+            let closest = 0;
+            let minDiff = Math.abs(list[0] - currentAmount);
+            for (let i = 1; i < list.length; i++) {
+                const diff = Math.abs(list[i] - currentAmount);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = i;
+                }
+            }
+            currentIndex = closest;
+        }
 
-        if (index > 0) {
-            index--;
-            this.betAmount = list[index];
-            panel.csBetAmount?.scrollToValue(this.betAmount);
+        if (currentIndex > 0) {
+            const newAmount = list[currentIndex - 1];
+            panel.onAmountChanged(newAmount);
             this.messageBox.hideMessage();
         } else {
             this.messageBox.showMessage("Mức cược tối thiểu");
         }
 
         this.node.getComponent(PopEffect)?.play();
-        this.updateLabel();
     }
 
     updateFromPanelBet() {
-        this.minBet = PanelBet.instance.minBet;
-        this.maxBet = PanelBet.instance.maxBet;
-        this.betAmount = PanelBet.instance.betAmount;
-        this.stepBet = PanelBet.instance.betSize;
-        this.node.getComponent(Label).string = currencyFormatSimple.format(this.betAmount);
-    }
+        const panel = PanelBet.getInstance();
+        if (!panel || !this.bet) return;
 
-    updateLabel() {
-        this.node.getComponent(Label).string = currencyFormatSimple.format(this.betAmount);
+        panel.ensureBetState();
+        this.bet.string = currencyFormatSimple.format(panel.betAmount);
     }
 }
 

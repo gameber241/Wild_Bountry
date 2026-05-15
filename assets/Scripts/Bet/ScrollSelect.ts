@@ -51,6 +51,7 @@ export class ScrollSelect extends Component {
     }
 
     scrollToIndex(id: number) {
+        if (!this.scrollView) return;
         this.scrollView.scrollToOffset(v2(0, this.itemHeight * id), 0.25);
     }
 
@@ -62,7 +63,7 @@ export class ScrollSelect extends Component {
     }
 
     regenerateValues(isColor = false) {
-        if (!this.prefabItem) return;
+        if (!this.prefabItem || !this.scrollView || !this.scrollView.content) return;
 
         this.scrollView.content.removeAllChildren();
         this._items = [];
