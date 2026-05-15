@@ -18,8 +18,15 @@ class NetworkServiceImpl {
     private activeLogDetailRequest: PendingRequest | null = null;
     private logDetailTimeout: ReturnType<typeof setTimeout> | null = null;
 
+    // Callback để handle từng free spin trong batch
+    public onBatchSpin?: (spinData: any) => void;
+
     hasToken(): boolean {
         return !!this.token;
+    }
+
+    setBatchSpinCallback(callback: (spinData: any) => void): void {
+        this.onBatchSpin = callback;
     }
 
     isConnected(): boolean {
@@ -32,6 +39,7 @@ class NetworkServiceImpl {
         this.clearSpinState();
         this.clearLogsState();
         this.clearLogDetailState();
+        this.onBatchSpin = undefined; // Clear callback khi đổi token
 
         if (this.ws) {
             try {
@@ -264,6 +272,20 @@ class NetworkServiceImpl {
                 pending.reject(new Error(payload.error || 'Spin thất bại'));
                 return;
             }
+
+            // Handle batch free spins nếu có
+            if (payload.batchSpins && Array.isArray(payload.batchSpins) && payload.batchSpins.length > 0) {
+                console.log(`[NetworkService] Processing ${payload.batchSpins.length} batch free spins`);
+                payload.batchSpins.forEach((batchSpin: any, index: number) => {
+                    console.log(`[NetworkService] Processing batch spin ${index + 1}/${payload.batchSpins.length}`);
+                    if (this.onBatchSpin) {
+                        this.onBatchSpin(batchSpin);
+                    } else {
+                        console.warn('[NetworkService] onBatchSpin callback not set, batch spin ignored');
+                    }
+                });
+            }
+
             pending.resolve(payload);
             return;
         }
@@ -364,6 +386,7 @@ class NetworkServiceImpl {
             this.spinTimeout = null;
         }
         this.activeSpinRequest = null;
+        // Không clear onBatchSpin ở đây vì nó có thể được set một lần
     }
 
     private clearLogsState(): void {

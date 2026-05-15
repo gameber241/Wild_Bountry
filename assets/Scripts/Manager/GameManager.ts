@@ -871,7 +871,7 @@ export class GameManager extends Component {
         this.btnNode.active = true
         this.bgUp.active = true
         this.wayFree.active = false
-        this.uiFreewin.active = false
+        // this.uiFreewin.active = false
     }
 
 
@@ -884,7 +884,7 @@ export class GameManager extends Component {
         this.btnNode.active = false
         this.bgUp.active = false
         this.wayFree.active = true
-        this.uiFreewin.active = true
+        // this.uiFreewin.active = true
     }
 }
 

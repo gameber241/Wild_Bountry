@@ -377,9 +377,7 @@
     "btnNode": {
       "__id__": 294
     },
-    "uiFreewin": {
-      "__id__": 551
-    },
+    "uiFreewin": null,
     "wayFree": {
       "__id__": 33
     },
