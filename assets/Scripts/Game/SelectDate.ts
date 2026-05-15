@@ -298,18 +298,18 @@ export class SelectDate extends Component {
         const format = (d: Date) =>
             `${d.getFullYear()}-${this.format(d.getMonth() + 1)}-${this.format(d.getDate())}`;
 
-        // GameManager.instance.history.getComponent(H_story).loadHistoryDemo({
-        //     limit: 25,
-        //     offset: 0,
-        //     sort: 't.desc',
-        //     dateFrom: format(start),
-        //     dateTo: format(end),
-        // });
+        GameManager.instance.his.getComponent(History).loadHistoryDemo({
+            limit: 25,
+            offset: 0,
+            sort: 't.desc',
+            dateFrom: format(start),
+            dateTo: format(end),
+        });
         const format1 = (d: Date) =>
             `${d.getFullYear()}/${this.format(d.getMonth() + 1)}/${this.format(d.getDate())}`;
         this.node.active = false;
-        // GameManager.instance.history.getComponent(H_story).title.string = format1(start) + "-" + format1(end),
-        //     GameManager.instance.history.getComponent(H_story).selectTime.active = false;
+        GameManager.instance.his.getComponent(History).title.string = format1(start) + "-" + format1(end),
+            GameManager.instance.his.getComponent(History).selectTime.active = false;
     }
 
     BtnClose() {

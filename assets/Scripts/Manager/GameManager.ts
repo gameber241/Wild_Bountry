@@ -56,7 +56,7 @@ export class GameManager extends Component {
     otherHeight = 0
     AnimFirstGame() {
         this.otherHeight = this.cameraMain.orthoHeight
-        this.cameraMain.orthoHeight = this.otherHeight + 150
+        this.cameraMain.orthoHeight = this.otherHeight + 100
         tween(this.cameraMain)
             .delay(0.5)
             .to(1, { orthoHeight: this.otherHeight }).start()
@@ -342,7 +342,7 @@ export class GameManager extends Component {
     }
 
     private async stopPhase2(index: number, grid: any[]) {
-        tween(this.cameraMain).to(1, { orthoHeight: this.otherHeight + 150 })
+        tween(this.cameraMain).to(1, { orthoHeight: this.otherHeight + 100 })
             .call(async () => {
 
             })

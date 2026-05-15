@@ -1,5 +1,7 @@
 import { _decorator, Component, instantiate, Label, Node, Prefab } from 'cc';
 import { currencyFormatSimple } from '../Manager/GameManager';
+import { SymbolHis } from '../Reels/SymbolHis';
+import { ItemWInDetailHistory } from '../Reels/ItemWInDetailHistory';
 
 const { ccclass, property } = _decorator;
 
@@ -49,27 +51,28 @@ export class ItemDetailHistory extends Component {
         this.transaction.string = dataRound.id
         this.profit.string = currencyFormatSimple.format(roundProfit)
         this.Balance.string = currencyFormatSimple.format(Number(dataRound?.balanceAfter ?? 0))
-        // data.grid.forEach((e, index) => {
-        //     e.forEach((s) => {
-        //         let item = instantiate(this.symbolHis)
-        //         this.reels[index].addChild(item)
-        //         item.getComponent(SymbolHis).InitSymbol(s)
-        //     })
-        // })
-        // if (data.win.positions.length > 0) {
-        //     this.winMultipiler.string = "Win Multiplier x " + data.multiplier
-        //     let result = this.buildSummaryFromPositions(data.win.positions)
-        //     for (const key in result) {
-        //         const value = result[key]
-        //         let item = instantiate(this.itemWInDetailHistory)
-        //         this.contain.addChild(item)
-        //         item.getComponent(ItemWInDetailHistory).SetUp(key, value)
-        //     }
-        // }
+        console.log(data)
+        data.grid.forEach((e, index) => {
+            e.forEach((s) => {
+                let item = instantiate(this.symbolHis)
+                this.reels[index].addChild(item)
+                item.getComponent(SymbolHis).InitSymbol(s)
+            })
+        })
+        if (data.win.normal.length > 0) {
+            this.winMultipiler.string = "Win Multiplier x " + data.multiplier
+            let result = this.buildSummaryFromPositions(data.win.normal)
+            for (const key in result) {
+                const value = result[key]
+                let item = instantiate(this.itemWInDetailHistory)
+                this.contain.addChild(item)
+                item.getComponent(ItemWInDetailHistory).SetUp(key, value)
+            }
+        }
 
-        // else {
-        //     this.winMultipiler.string = "No win Multiplier"
-        // }
+        else {
+            this.winMultipiler.string = "No win Multiplier"
+        }
 
     }
 

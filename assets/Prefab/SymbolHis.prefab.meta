@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "1801a336-29af-464a-bc07-6cc43ab3dfe9",
+  "uuid": "3f40c0dc-c168-4819-8b23-f8635ce3e8f8",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "symbolHistory"
+    "syncNodeName": "SymbolHis"
   }
 }

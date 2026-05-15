@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, Label, Node } from 'cc';
 import { History } from './History';
+import { GameManager } from '../Manager/GameManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('SelectDateRange')
@@ -19,17 +20,17 @@ export class SelectDateRange extends Component {
         switch (Number(args)) {
             case 0:
                 this.node.active = false
-                // GameManager.instance.history.getComponent(H_story).UpdateLogDay();
+                GameManager.instance.his.getComponent(History).UpdateLogDay();
                 this.node.active = false
 
                 break
             case 1:
-                // GameManager.instance.history.getComponent(H_story).UpdateLog7dayCustom();
+                GameManager.instance.his.getComponent(History).UpdateLog7dayCustom();
                 this.node.active = false
 
                 break
             case 2:
-                // GameManager.instance.history.getComponent(H_story).selectTimeCustom.active = true;
+                GameManager.instance.his.getComponent(History).selectTimeCustom.active = true;
                 break
         }
     }

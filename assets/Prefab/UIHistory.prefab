@@ -4940,7 +4940,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 523.3900000000001,
+      "y": 449.313,
       "z": 0
     },
     "_lrot": {
@@ -5139,7 +5139,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 757.334,
+      "width": 720,
       "height": 116.54799999999997
     },
     "_anchorPoint": {
@@ -5314,7 +5314,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 399.37200000000007,
+      "y": 325.295,
       "z": 0
     },
     "_lrot": {
@@ -5513,7 +5513,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 757.334,
+      "width": 720,
       "height": 116.54799999999997
     },
     "_anchorPoint": {
@@ -5688,7 +5688,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 277.341,
+      "y": 203.264,
       "z": 0
     },
     "_lrot": {
@@ -5887,7 +5887,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 757.334,
+      "width": 720,
       "height": 116.54799999999997
     },
     "_anchorPoint": {
@@ -6195,7 +6195,7 @@
         "__id__": 484
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 493
@@ -6822,7 +6822,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 299.10250000000013,
+      "y": 214.217,
       "z": 0
     },
     "_lrot": {
@@ -10719,7 +10719,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 757.334,
+      "width": 720,
       "height": 565.1229999999999
     },
     "_anchorPoint": {
@@ -10815,7 +10815,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -26.473,
-      "y": 466.934,
+      "y": 382.048,
       "z": 0
     },
     "_lrot": {
@@ -10855,7 +10855,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 757.3342,
       "height": 0
     },
     "_anchorPoint": {
@@ -10944,7 +10944,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 90.428,
-      "y": 466.934,
+      "y": 382.048,
       "z": 0
     },
     "_lrot": {
@@ -10984,7 +10984,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 757.3342,
       "height": 0
     },
     "_anchorPoint": {
@@ -11073,7 +11073,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 202.954,
-      "y": 466.934,
+      "y": 382.048,
       "z": 0
     },
     "_lrot": {
@@ -11113,7 +11113,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 757.3342,
       "height": 0
     },
     "_anchorPoint": {
@@ -11202,7 +11202,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -29.514,
-      "y": 212.991,
+      "y": 128.105,
       "z": 0
     },
     "_lrot": {
@@ -11242,7 +11242,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 757.3342,
       "height": 0
     },
     "_anchorPoint": {
@@ -11331,7 +11331,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 87.387,
-      "y": 212.991,
+      "y": 128.105,
       "z": 0
     },
     "_lrot": {
@@ -11371,7 +11371,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 757.3342,
       "height": 0
     },
     "_anchorPoint": {
@@ -11460,7 +11460,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 199.913,
-      "y": 212.991,
+      "y": 128.105,
       "z": 0
     },
     "_lrot": {
@@ -11500,7 +11500,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 757.3342,
       "height": 0
     },
     "_anchorPoint": {
@@ -11592,7 +11592,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -291.642,
-      "y": 650,
+      "y": 574.126,
       "z": 0
     },
     "_lrot": {
@@ -11744,7 +11744,9 @@
     "_disabledSprite": null,
     "_duration": 0.1,
     "_zoomScale": 1.2,
-    "_target": null,
+    "_target": {
+      "__id__": 484
+    },
     "_id": ""
   },
   {
