@@ -547,7 +547,7 @@ export class GameManager extends Component {
         };
         // danh sách animation cần chạy
         const winQueue: Array<() => void> = [];
-
+        console.log(r, " check")
         if (r.BigWin) {
 
             winQueue.push(() => {
