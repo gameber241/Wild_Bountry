@@ -113,9 +113,7 @@ export class Spin extends Component {
             this.AutoSpinNext()
         }
     }
-
-    // ================= AUTO SPIN =================
-
+    
     isAuto = false
     autoCount = 0
 
@@ -132,7 +130,6 @@ export class Spin extends Component {
     }
 
     AutoSpinNext() {
-
         if (this.autoCount <= 0) {
             this.StopAuto()
             return

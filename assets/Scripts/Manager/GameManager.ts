@@ -49,6 +49,7 @@ export class GameManager extends Component {
     @property(History)
     his: History = null
 
+
     turboMode = 0
     //data Freespin
     dataFreespin: any = null
@@ -795,7 +796,6 @@ export class GameManager extends Component {
                 Spin.instance.ActiveSpin()
                 this.SetModeNormal();
                 // SoundToggle.instance.playNormal()
-                // MultiplierCarouselFinal.instance.resetCombo()
 
                 if (Spin.instance.isAuto == true) {
                     Spin.instance.AutoSpinNext()
@@ -816,7 +816,7 @@ export class GameManager extends Component {
         // Waymanager.instance.resetWay()
         this.sampleJson = dataFree
         const grid = this.sampleJson.rounds[this.indexCurrentReel].grid;
-        // FreeSpines.instance.UpdateFreeSpinLb(this.totalFreeSpin)
+        FreeSpines.instance.UpdateFreeSpinLb(this.totalFreeSpin)
         this.GenerateMap(grid);
     }
 
@@ -856,6 +856,8 @@ export class GameManager extends Component {
     @property(Node)
     btnNode: Node = null
 
+    @property(Node)
+    uiFreewin: Node = null
 
     @property(Node)
     wayFree: Node = null
@@ -869,6 +871,7 @@ export class GameManager extends Component {
         this.btnNode.active = true
         this.bgUp.active = true
         this.wayFree.active = false
+        this.uiFreewin.active = false
     }
 
 
@@ -881,7 +884,7 @@ export class GameManager extends Component {
         this.btnNode.active = false
         this.bgUp.active = false
         this.wayFree.active = true
-
+        this.uiFreewin.active = true
     }
 }
 

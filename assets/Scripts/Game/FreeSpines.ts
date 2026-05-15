@@ -67,23 +67,20 @@ export class FreeSpines extends Component {
     startCheckFree() {
         this.checkFreeTimer = setInterval(() => {
             if (GameManager.instance.dataFreespin != null) {
+                console.log(GameManager.instance.dataFreespin, "dataFreespin")
                 clearInterval(this.checkFreeTimer);
                 this.checkFreeTimer = null;
                 this.fxLoading.setAnimation(0, "btn_start_idle_click", true)
-
-                // this.fx.addAnimation(0, "_FreeWin_Action", false)
-                // this.fx.addAnimation(0, "_FreeWin_Action_Idle", false)
                 this.btnStartFreeSpin.active = true
-
+                GameManager.instance.SetModeFreeSpin()
             }
-        }, 100); // check mỗi 100ms
+        }, 100)
     }
 
 
     BtnStartSpin() {
         this.fx.addAnimation(0, "FreeWin_end", true)
         this.uiWaitFreeSpin.active = false
-
         this.fx.setCompleteListener((tracking) => {
             if (tracking.animation.name != "FreeWin_end") return
             this.fx.setCompleteListener(null)
@@ -92,19 +89,15 @@ export class FreeSpines extends Component {
             GameManager.instance.indexCurrentReel = 0
             this.fx.node.active = false
             MultiplierCarouselFinal.instance.switchToScratchMode()
-
-
         });
 
     }
 
     ShowTotalSpin(callback, target) {
         this.resetState();
-
         this.totlSpines.node.active = true
         this.totlSpines.setAnimation(0, "_TotalWin_Appear", false)
         this.totlSpines.addAnimation(0, "_TotalWin_Idle", true)
-
         this.playTo(target, 3, this.totalLb, callback)
         this.totlSpines.setCompleteListener((tracking) => {
             if (tracking.animation.name != "_TotalWin_Idle") return
@@ -118,10 +111,8 @@ export class FreeSpines extends Component {
 
 
     private playTo(targetValue: number, duration: number, label: Label, callback: Function) {
-
         this.targetValue = targetValue;
         this.tweenObj = { value: this.currentValue };
-
         this.runningTween = tween(this.tweenObj)
             .to(duration, { value: targetValue }, {
                 easing: "cubicOut",
@@ -140,34 +131,28 @@ export class FreeSpines extends Component {
         this.touchHandler = () => {
             this.stopAndComplete(label, callback);
         };
-
         this.fx.node.on(Input.EventType.TOUCH_END, this.touchHandler, this);
     }
 
     // =============================
 
     private stopAndComplete(label: Label, callback?: Function) {
-
         if (this.isStopped) return;
         this.isStopped = true;
-
         if (this.runningTween) {
             this.runningTween.stop();
             this.runningTween = null;
         }
-
         if (this.tweenObj) {
             this.currentValue = this.targetValue;
             label.string = currencyFormatSimple.format(this.targetValue)
         }
-
         this.complete(label, callback);
     }
 
     // =============================
 
     private complete(label: Label, callback?: Function) {
-
         // remove event
         if (this.touchHandler) {
             this.fx.node.off(Input.EventType.TOUCH_END, this.touchHandler, this);
@@ -182,19 +167,15 @@ export class FreeSpines extends Component {
     // =============================
 
     private resetState() {
-
         this.unscheduleAllCallbacks();
-
         if (this.runningTween) {
             this.runningTween.stop();
             this.runningTween = null;
         }
-
         if (this.touchHandler) {
             this.node.off(Input.EventType.TOUCH_END, this.touchHandler, this);
             this.touchHandler = null;
         }
-
         this.currentValue = 0;
         this.isStopped = false;
     }
