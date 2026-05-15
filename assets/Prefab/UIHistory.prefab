@@ -304,7 +304,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
+      "x": -0.9289999999999736,
       "y": 570,
       "z": 0
     },
@@ -426,9 +426,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Game History",
@@ -1154,8 +1154,8 @@
     },
     "_alignFlags": 41,
     "_target": null,
-    "_left": 0,
-    "_right": 0,
+    "_left": -0.929,
+    "_right": 0.929,
     "_top": 0,
     "_bottom": 670,
     "_horizontalCenter": 0,
@@ -3083,9 +3083,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 230,
-      "g": 174,
-      "b": 96,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Normal Spin",
@@ -3753,7 +3753,7 @@
     "_isAbsVerticalCenter": true,
     "_originalWidth": 500,
     "_originalHeight": 300,
-    "_alignMode": 2,
+    "_alignMode": 1,
     "_lockFlags": 0,
     "_id": ""
   },
@@ -4587,9 +4587,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Select Date Range",
@@ -4746,9 +4746,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -5061,9 +5061,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Today",
@@ -6569,9 +6569,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Custom",
@@ -6943,9 +6943,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Bắt đầu",
@@ -7102,9 +7102,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Kết thúc",
@@ -7318,9 +7318,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "2026",
@@ -7427,9 +7427,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -7508,7 +7508,9 @@
     "_disabledSprite": null,
     "_duration": 0.1,
     "_zoomScale": 1.2,
-    "_target": null,
+    "_target": {
+      "__id__": 298
+    },
     "_id": ""
   },
   {
@@ -7690,9 +7692,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "2026",
@@ -7799,9 +7801,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -8062,9 +8064,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "2026",
@@ -8171,9 +8173,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -8434,9 +8436,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "2026",
@@ -8543,9 +8545,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -8808,9 +8810,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "2026",
@@ -8917,9 +8919,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -9180,9 +9182,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "2026",
@@ -9289,9 +9291,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -10394,9 +10396,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Confirm",
@@ -10553,9 +10555,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -11663,9 +11665,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {

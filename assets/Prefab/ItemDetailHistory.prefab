@@ -25,14 +25,14 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 220
+        "__id__": 222
       },
       {
-        "__id__": 222
+        "__id__": 224
       }
     ],
     "_prefab": {
-      "__id__": 224
+      "__id__": 226
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -83,15 +83,18 @@
       },
       {
         "__id__": 217
+      },
+      {
+        "__id__": 219
       }
     ],
     "_prefab": {
-      "__id__": 219
+      "__id__": 221
     },
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": -67.5,
       "z": 0
     },
     "_lrot": {
@@ -391,7 +394,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 757.984,
+      "width": 720,
       "height": 114.29199999999999
     },
     "_anchorPoint": {
@@ -594,9 +597,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 238,
-      "g": 179,
-      "b": 99,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Transaction",
@@ -1071,9 +1074,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 238,
-      "g": 179,
-      "b": 99,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Bet",
@@ -1389,9 +1392,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 238,
-      "g": 179,
-      "b": 99,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Profit",
@@ -1707,9 +1710,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 238,
-      "g": 179,
-      "b": 99,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Balance",
@@ -1785,7 +1788,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 757.984,
+      "width": 720,
       "height": 112.735
     },
     "_anchorPoint": {
@@ -2024,9 +2027,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 202,
-      "g": 155,
-      "b": 91,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Round",
@@ -2183,9 +2186,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 202,
-      "g": 155,
-      "b": 91,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "1/5",
@@ -5307,6 +5310,42 @@
     "fileId": "a5EDjR+PhORq4tKuY9Rgtf"
   },
   {
+    "__type__": "cc.Widget",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "__prefab": {
+      "__id__": 220
+    },
+    "_alignFlags": 1,
+    "_target": null,
+    "_left": 0,
+    "_right": 0,
+    "_top": 0,
+    "_bottom": 0,
+    "_horizontalCenter": 0,
+    "_verticalCenter": 0,
+    "_isAbsLeft": true,
+    "_isAbsRight": true,
+    "_isAbsTop": true,
+    "_isAbsBottom": true,
+    "_isAbsHorizontalCenter": true,
+    "_isAbsVerticalCenter": true,
+    "_originalWidth": 0,
+    "_originalHeight": 0,
+    "_alignMode": 2,
+    "_lockFlags": 0,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.CompPrefabInfo",
+    "fileId": "8cJyQPSw9GB4uf00MmSH3L"
+  },
+  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
@@ -5329,12 +5368,12 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 221
+      "__id__": 223
     },
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 720,
-      "height": 1280
+      "height": 1145
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -5357,7 +5396,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 223
+      "__id__": 225
     },
     "Balance": {
       "__id__": 53

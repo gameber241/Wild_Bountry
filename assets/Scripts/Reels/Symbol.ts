@@ -4,6 +4,7 @@ import { ReelBase } from './ReelBase';
 import { SymbolType } from '../Enum/ESymbolFace';
 import { SymbolCell } from './SymbolCell';
 import { GameManager } from '../Manager/GameManager';
+import { Spin } from '../Game/Spin';
 
 
 const { ccclass, property, executeInEditMode } = _decorator;
@@ -157,13 +158,14 @@ export class Symbol extends Component {
         this.playFrameAnimation(name, true);
     }
 
-    InitSymbol(data) {
+    InitSymbol(data, isClick = true) {
         this.isInit = true;
         this.face = data.i;
         this.frameState = data.t;
 
 
         this.SetUISymbolNormal();
+        if (isClick == false) return
         this.icon.node.off(Input.EventType.TOUCH_END, this.ShowInf, this)
         this.icon.node.on(Input.EventType.TOUCH_END, this.ShowInf, this)
     }
@@ -189,6 +191,8 @@ export class Symbol extends Component {
         this.face = faces[Math.floor(Math.random() * faces.length)];
         this.frameState = "n";
         this.icon.node.off(Input.EventType.TOUCH_END, this.ShowInf, this)
+        this.icon.node.on(Input.EventType.TOUCH_END, this.ShowInf, this)
+
 
     }
 
@@ -378,8 +382,10 @@ export class Symbol extends Component {
     // textScratch: Node = null
 
     ShowInf() {
-        // if (Spin.instance.isAuto == true) return
-        // if (Spin.instance.isSpin == true) return
+        if (Spin.instance.isAuto == true) return
+        if (Spin.instance.isSpin == true) return
+        console.log("den day")
+        GameManager.instance.infSynbol.Show({ i: this.face, t: this.frameState }, this.icon.node.worldPosition.clone())
         // GameManager.instance.maskInf.active = true
         // this.infNode.active = true
         // this.titleInf1.string = SymbolPayoutConfig[this.face].count

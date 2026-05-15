@@ -45,7 +45,7 @@ export class ItemDetailHistory extends Component {
         const roundBet = index > 0 ? 0 : Number(dataRound?.bet ?? 0)
         const roundProfit = roundWin - roundBet
 
-        this.roundIndex.string = index + "/" + maxIndex
+        this.roundIndex.string = (index + 1) + "/" + maxIndex
         this.betSize.string = currencyFormatSimple.format(Number(dataRound?.betSize ?? 0))
         this.bet.string = currencyFormatSimple.format(roundBet)
         this.transaction.string = dataRound.id

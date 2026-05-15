@@ -201,8 +201,6 @@
       "__id__": 0
     },
     "fileId": "6ejw5FthVC8ryF0wYhgE1I",
-    "instance": null,
-    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -300,9 +298,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "2026",
@@ -459,9 +457,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 245,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {

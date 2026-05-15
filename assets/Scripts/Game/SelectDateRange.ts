@@ -15,7 +15,7 @@ export class SelectDateRange extends Component {
             e.children[0].getComponent(Label).color = Color.WHITE
         })
 
-        target.target.children[0].getComponent(Label).color = new Color(246, 186, 101)
+        target.target.children[0].getComponent(Label).color = new Color(248, 210, 0)
         console.log(args)
         switch (Number(args)) {
             case 0:

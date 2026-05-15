@@ -14,6 +14,7 @@ import { UserInfo } from '../Server/UserInfo';
 import { PanelBet } from '../Bet/PanelBet';
 import { SymbolFrameState } from '../Enum/SymbolFrameState';
 import { History } from '../Game/History';
+import { InfSymbol } from '../Game/InfSymbol';
 
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -48,6 +49,9 @@ export class GameManager extends Component {
 
     @property(History)
     his: History = null
+
+    @property(InfSymbol)
+    infSynbol: InfSymbol = null;
 
 
     turboMode = 0
@@ -281,6 +285,7 @@ export class GameManager extends Component {
             return;
         }
 
+        this.infSynbol.hide()
         MultiplierCarouselFinal.instance.resetCombo()
         this.stepWinCurrent = 0
         this.UpdateStepWIn(0)

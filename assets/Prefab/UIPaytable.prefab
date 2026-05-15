@@ -405,9 +405,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 246,
-      "g": 186,
-      "b": 101,
+      "r": 248,
+      "g": 210,
+      "b": 0,
       "a": 255
     },
     "_string": "Paytable",
