@@ -13,6 +13,7 @@ import { NetworkService } from '../Server/NetworkService';
 import { UserInfo } from '../Server/UserInfo';
 import { PanelBet } from '../Bet/PanelBet';
 import { SymbolFrameState } from '../Enum/SymbolFrameState';
+import { History } from '../Game/History';
 
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -37,11 +38,17 @@ export class GameManager extends Component {
 
     @property({ type: ReelBase })
     reels: ReelBase[] = []
+
     public static instance: GameManager = null
+
     public stoppedCount = 0
 
     @property(Camera)
     cameraMain: Camera = null;
+
+    @property(History)
+    his: History = null
+
     turboMode = 0
     //data Freespin
     dataFreespin: any = null
@@ -761,18 +768,6 @@ export class GameManager extends Component {
             return true;
         });
     }
-
-
-    @property(Node)
-    DatCuocNode: Node = null
-
-    BtnCuoc() {
-        this.DatCuocNode.active = true
-    }
-
-
-
-
     isFreeSpin = false
     indexCurrentFreeSpin = 0
     totalFreeSpin = 0

@@ -1,6 +1,7 @@
-import { _decorator, Component, Prefab, ScrollView, Node, Label } from 'cc';
+import { _decorator, Component, Prefab, ScrollView, Node, Label, instantiate } from 'cc';
 import { DetailHistory } from './DetailHistory';
 import { NetworkService } from '../Server/NetworkService';
+import { ItemHistory } from './ItemHistory';
 const { ccclass, property } = _decorator;
 
 type HistoryQuery = {
@@ -31,7 +32,7 @@ export class History extends Component {
     selectTimeCustom: Node = null
 
     @property(Node)
-    uiHis: Node = null
+    loading: Node = null
 
     @property(Label)
     title: Label = null
@@ -80,6 +81,8 @@ export class History extends Component {
     }
 
     public async loadHistoryDemo(data: HistoryQuery) {
+        this.loading.active = true
+        this.scrollHis.content.destroyAllChildren()
         const wsService = NetworkService.getInstance();
         if (!wsService.hasToken()) {
             this.logs = []
@@ -94,17 +97,24 @@ export class History extends Component {
             const logs = logsResult?.logs || logsResult?.data || logsResult?.items || [];
             this.logs = Array.isArray(logs) ? logs : [];
             console.log('[History] Loaded logs:', this.logs.length, this.logs);
+            this.loading.active = false
+            this.logs.forEach(e => {
+                let item = instantiate(this.itemHis)
+                this.scrollHis.content.addChild(item)
+                item.getComponent(ItemHistory).SetUp(e)
+                console.log("den day")
+            })
+            // const firstLogId = this.logs[0]?.id;
+            // if (firstLogId) {
+            //     try {
+            //         const detailResult = await this.loadLogDetail(firstLogId);
+            //         const detailLog = detailResult?.log || detailResult?.data || detailResult;
+            //         console.log('[History] First log detail:', firstLogId, detailLog);
 
-            const firstLogId = this.logs[0]?.id;
-            if (firstLogId) {
-                try {
-                    const detailResult = await this.loadLogDetail(firstLogId);
-                    const detailLog = detailResult?.log || detailResult?.data || detailResult;
-                    console.log('[History] First log detail:', firstLogId, detailLog);
-                } catch (detailError) {
-                    console.error('[History] Failed to load first log detail:', firstLogId, detailError);
-                }
-            }
+            //     } catch (detailError) {
+            //         console.error('[History] Failed to load first log detail:', firstLogId, detailError);
+            //     }
+            // }
         } catch (error) {
             this.logs = []
             console.error('[History] Failed to load history:', error);
