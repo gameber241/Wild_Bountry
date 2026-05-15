@@ -13,10 +13,10 @@ export class Rules extends Component {
 
     } protected update(dt: number): void {
         if (Spin.instance.isSpin == true) {
-            this.node.getComponent(Button).interactable = false
+            this.node.getComponent(Button).enabled   = false
         }
         else {
-            this.node.getComponent(Button).interactable = true
+            this.node.getComponent(Button).enabled   = true
 
         }
     }

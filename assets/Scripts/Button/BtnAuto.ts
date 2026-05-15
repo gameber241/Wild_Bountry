@@ -1,5 +1,6 @@
 import { _decorator, Button, Component, Node } from 'cc';
 import { Spin } from '../Game/Spin';
+import { AutoCtrl } from '../Game/AutoCtrl';
 const { ccclass, property } = _decorator;
 
 @ccclass('BtnAuto')
@@ -9,16 +10,16 @@ export class BtnAuto extends Component {
 
 
     BtnClick() {
-        this.autoUI.active = true;
+        this.autoUI.getComponent(AutoCtrl).show()
     }
 
 
     protected update(dt: number): void {
         if (Spin.instance.isSpin == true) {
-            this.node.getComponent(Button).interactable = false
+            this.node.getComponent(Button).enabled = false
         }
         else {
-            this.node.getComponent(Button).interactable = true
+            this.node.getComponent(Button).enabled = true
 
         }
     }

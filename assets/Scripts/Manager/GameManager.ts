@@ -84,24 +84,7 @@ export class GameManager extends Component {
         this.UpdateStepWIn(0)
         this.SetModeNormal()
         this.initGrid()
-        this.updateBalanceDisplay();
         this.reels = ListReel.instance.reels
-        // this.scheduleOnce(() => {
-        //     const wsService = WebSocketService.getInstance();
-        //     if (wsService) {
-        //         wsService.getProfile();
-        //     }
-        // }, 0.1);
-    }
-
-    onProfileUpdated(payload: any): void {
-        // const balance = this.extractBalanceFromPayload(payload);
-        // if (balance !== null) {
-        //     UserInfo.getInstance().updateBalance(balance);
-        //     this.updateBalanceDisplay();
-        // } else {
-        //     console.warn('[GameManager] Could not extract balance from payload');
-        // }
     }
 
     betCurrent: number = 0
@@ -127,7 +110,7 @@ export class GameManager extends Component {
         if (!panel) {
             return;
         }
-
+        console.log(panel.betAmount)
         this.UpdateBetConfig(panel.betAmount, panel.betSize, panel.betLevel, panel.betBetbase);
     }
 
@@ -238,26 +221,6 @@ export class GameManager extends Component {
         return null;
     }
 
-    updateBalanceDisplay(): void {
-        // const balance = UserInfo.getInstance().balance;
-        // console.log('[GameManager] updateBalanceDisplay - balance from UserInfo:', balance);
-
-        // if (this.walet) {
-        //     const formatted = balance.toLocaleString('en-US', {
-        //         minimumFractionDigits: 2,
-        //         maximumFractionDigits: 2
-        //     });
-        //     console.log('[GameManager] Setting walet.string to:', formatted);
-        //     this.walet.string = formatted;
-        //     this.ballanTitle.string = formatted;
-        //     this.walletAuto.string = formatted;
-
-
-
-        // } else {
-        //     console.warn('[GameManager] walet Label is null!');
-        // }
-    }
 
     protected onDestroy(): void {
         // EventBus.getInstance().off('profile:updated', this.onProfileUpdated);
@@ -512,10 +475,9 @@ export class GameManager extends Component {
             // SoundToggle.instance.PlaySymbolWin()
             this.stepOld = this.sampleJson.rounds[this.indexCurrentReel].multiplier
             MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
-            TextBoxGame.instant.PlayStepWin(r.win.stepWin, this.stepOld)
-
-            await GameManager.waitForSeconds(1.1);
+            TextBoxGame.instant.PlayStepWin(r.stepWin, this.stepOld)
             ListReel.instance.HideMaskEffect()
+            await GameManager.waitForSeconds(0.7);
             if (r.win.wild.length > 0) {
                 this.FlipData();
             }
@@ -569,9 +531,13 @@ export class GameManager extends Component {
                 }
                 else {
                     this.indexCurrentReel = 0;
-                    Spin.instance.ActiveSpin()
                     this.SetModeNormal();
-                    // SoundToggle.instance.playNormal()
+                    if (Spin.instance.isAuto == true) {
+                        Spin.instance.AutoSpinNext()
+                    }
+                    else {
+                        Spin.instance.isSpin = false;
+                    }
                 }
 
             }
@@ -871,7 +837,7 @@ export class GameManager extends Component {
         this.btnNode.active = true
         this.bgUp.active = true
         this.wayFree.active = false
-        // this.uiFreewin.active = false
+        this.uiFreewin.active = false
     }
 
 
@@ -884,7 +850,7 @@ export class GameManager extends Component {
         this.btnNode.active = false
         this.bgUp.active = false
         this.wayFree.active = true
-        // this.uiFreewin.active = true
+        this.uiFreewin.active = true
     }
 }
 

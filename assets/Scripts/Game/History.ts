@@ -129,7 +129,7 @@ export class History extends Component {
     }
 
     ShowDetail(data: any) {
-        this.detailHistory.show(data)
+        this.detailHistory.show(data.log)
     }
 
     BtnSelectTime() {

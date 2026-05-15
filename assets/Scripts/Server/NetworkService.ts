@@ -95,7 +95,7 @@ class NetworkServiceImpl {
                     reject(new Error(event.reason || 'WebSocket đã đóng'));
                     return;
                 }
-                this.handleSocketClose(event);
+                this.handleSocketClose();
             };
         });
 
@@ -276,6 +276,8 @@ class NetworkServiceImpl {
             // Handle batch free spins nếu có
             if (payload.batchSpins && Array.isArray(payload.batchSpins) && payload.batchSpins.length > 0) {
                 console.log(`[NetworkService] Processing ${payload.batchSpins.length} batch free spins`);
+                console.log("Free", payload.batchSpins)
+
                 payload.batchSpins.forEach((batchSpin: any, index: number) => {
                     console.log(`[NetworkService] Processing batch spin ${index + 1}/${payload.batchSpins.length}`);
                     if (this.onBatchSpin) {

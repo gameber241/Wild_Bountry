@@ -2534,7 +2534,7 @@
         "__id__": 161
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 170
@@ -4061,6 +4061,8 @@
       "__id__": 0
     },
     "fileId": "a4fSOpzn1CXIXsJoP+OAKY",
+    "instance": null,
+    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {

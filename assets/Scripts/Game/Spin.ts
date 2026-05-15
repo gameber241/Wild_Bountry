@@ -36,11 +36,9 @@ export class Spin extends Component {
     isIdle = false
 
     TouchEnd() {
-        if (this.isSpin) return
-
         // nếu đang auto mà bấm tay => tắt auto
         if (this.isAuto) this.StopAuto()
-
+        if (this.isSpin) return
         this.StartSpin()
     }
 
@@ -113,7 +111,7 @@ export class Spin extends Component {
             this.AutoSpinNext()
         }
     }
-    
+
     isAuto = false
     autoCount = 0
 
@@ -136,13 +134,16 @@ export class Spin extends Component {
         }
         this.autoCount--
         this.lbAuto.string = this.autoCount.toString()
+        if (this.autoCount == 0) {
+            this.StopAuto()
+        }
         this.StartSpin()
     }
 
     StopAuto() {
         this.isAuto = false
         this.animSpinPlay.node.active = true
-
+        this.PlayIdle();
     }
 
     // ================= FX =================

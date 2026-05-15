@@ -41,7 +41,7 @@ export class AutoCtrl extends Component {
 
 
     }
-    countAuto  = 0
+    countAuto = 0
     btnClose() {
         // this.node.getComponent(UIOpacity).opacity = 0
         tween(this.node.getComponent(UIOpacity)).to(0.3, { opacity: 0 })

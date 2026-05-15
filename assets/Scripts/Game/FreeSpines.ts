@@ -96,17 +96,10 @@ export class FreeSpines extends Component {
     ShowTotalSpin(callback, target) {
         this.resetState();
         this.totlSpines.node.active = true
-        this.totlSpines.setAnimation(0, "_TotalWin_Appear", false)
-        this.totlSpines.addAnimation(0, "_TotalWin_Idle", true)
+        this.totlSpines.setAnimation(0, "TotalWin_start", false)
+        this.totlSpines.addAnimation(0, "TotalWin_loop", true)
         this.playTo(target, 3, this.totalLb, callback)
-        this.totlSpines.setCompleteListener((tracking) => {
-            if (tracking.animation.name != "_TotalWin_Idle") return
-            this.totlSpines.setCompleteListener(null)
 
-            // this.scheduleOnce(() => {
-            //     callback?.()
-            // }, 2)
-        });
     }
 
 
@@ -131,7 +124,7 @@ export class FreeSpines extends Component {
         this.touchHandler = () => {
             this.stopAndComplete(label, callback);
         };
-        this.fx.node.on(Input.EventType.TOUCH_END, this.touchHandler, this);
+        this.node.on(Input.EventType.TOUCH_END, this.touchHandler, this);
     }
 
     // =============================
@@ -155,7 +148,7 @@ export class FreeSpines extends Component {
     private complete(label: Label, callback?: Function) {
         // remove event
         if (this.touchHandler) {
-            this.fx.node.off(Input.EventType.TOUCH_END, this.touchHandler, this);
+            this.node.off(Input.EventType.TOUCH_END, this.touchHandler, this);
             this.touchHandler = null;
         }
         // delay hide giống slot

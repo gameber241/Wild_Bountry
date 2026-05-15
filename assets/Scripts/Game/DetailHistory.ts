@@ -16,11 +16,11 @@ export class DetailHistory extends Component {
         this.pageDetail.removeAllPages()
         this.node.active = true
         console.log(dataDetail, "history")
-        // dataDetail.replayRounds.forEach((e, index) => {
-        //     let item = instantiate(this.itemDetailhis)
-        //     this.pageDetail.addPage(item)
-        //     item.getComponent(ItemDetailHistory).SetUp(e, dataDetail, index, dataDetail.replayRounds.length)
-        // })
+        dataDetail.replayRounds.forEach((e, index) => {
+            let item = instantiate(this.itemDetailhis)
+            this.pageDetail.addPage(item)
+            item.getComponent(ItemDetailHistory).SetUp(e, dataDetail, index, dataDetail.replayRounds.length)
+        })
 
     }
 
