@@ -2653,10 +2653,6 @@
     "messageBox": {
       "__id__": 109
     },
-    "betAmount": 12,
-    "stepBet": 4,
-    "minBet": 4,
-    "maxBet": 40,
     "bet": null,
     "_id": ""
   },

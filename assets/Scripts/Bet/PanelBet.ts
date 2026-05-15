@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, Component, Label, labelAssembler, math } from 'cc';
+import { _decorator, CCFloat, Component, director, Label, Node } from 'cc';
 import { ScrollSelect } from './ScrollSelect';
 import { LabelBet } from './LabelBet';
 import { currencyFormatSimple, GameManager } from '../Manager/GameManager';
@@ -7,6 +7,7 @@ const { ccclass, property } = _decorator;
 @ccclass('PanelBet')
 export class PanelBet extends Component {
     static instance: PanelBet = null;
+    static readonly DEFAULT_BET_AMOUNT = 0.8;
 
     @property(ScrollSelect)
     csBetSize: ScrollSelect = null;
@@ -62,8 +63,10 @@ export class PanelBet extends Component {
     }
 
     _betAmounts: number[] = null;
+    private _hasInitializedBetState = false;
+
     get betAmounts() {
-        if (this._betAmounts != null) return this._betAmounts;
+        if (this._betAmounts && this._betAmounts.length > 0) return this._betAmounts;
         if (!this.betLevels || !this.betSizes) return [];
         this._betAmounts = [];
         for (let i = 0; i < this.betSizes.length; i++) {
@@ -78,39 +81,116 @@ export class PanelBet extends Component {
         return this._betAmounts;
     }
 
+    static getInstance() {
+        if (PanelBet.instance?.node?.isValid) {
+            return PanelBet.instance;
+        }
+
+        const scene = director.getScene();
+        if (!scene) {
+            return null;
+        }
+
+        const queue: Node[] = [scene];
+        while (queue.length > 0) {
+            const node = queue.shift();
+            const panel = node?.getComponent(PanelBet);
+            if (panel) {
+                PanelBet.instance = panel;
+                return panel;
+            }
+            queue.push(...node.children);
+        }
+
+        return null;
+    }
+
+    public ensureBetState() {
+        if (this.csBetSize) {
+            this.csBetSize.values = this.betSizes;
+        }
+
+        if (this.csBetLevel) {
+            this.csBetLevel.values = this.betLevels;
+        }
+
+        if (this.csBetBase) {
+            this.csBetBase.values = [this.betBase];
+        }
+
+        this._betAmounts = null;
+        if (this.csBetAmount) {
+            this.csBetAmount.values = this.betAmounts;
+        }
+
+        if (this._hasInitializedBetState) return;
+
+        this._hasInitializedBetState = true;
+        this.onAmountChanged(PanelBet.DEFAULT_BET_AMOUNT);
+        if (this.csBetAmount) {
+            this.csBetAmount.value = PanelBet.DEFAULT_BET_AMOUNT;
+        }
+    }
+
     protected onLoad(): void {
-        this.commitToLabelBet();
+        PanelBet.instance = this;
+        this.ensureBetState();
     }
 
     constructor() {
         super();
-        PanelBet.instance = this;
     }
 
     start() {
-        this.csBetSize.values = this.betSizes;
-        this.csBetSize.regenerateValues();
-        this.csBetSize.node.on("value_changed", this.onBetChanged, this)
+        if (this.csBetSize) {
+            this.csBetSize.node.on("value_changed", this.onBetChanged, this);
+        }
 
-        this.csBetLevel.values = this.betLevels;
-        this.csBetLevel.regenerateValues();
-        this.csBetLevel.node.on("value_changed", this.onBetChanged, this)
+        if (this.csBetLevel) {
+            this.csBetLevel.node.on("value_changed", this.onBetChanged, this);
+        }
 
-        this.csBetBase.values = [this.betBase];
-        this.csBetBase.regenerateValues();
-        this.csBetBase.node.on("value_changed", this.onBetChanged, this)
+        if (this.csBetBase) {
+            this.csBetBase.node.on("value_changed", this.onBetChanged, this);
+        }
 
-        this.csBetAmount.values = this.betAmounts;
-        this.csBetAmount.regenerateValues(true);
-        this.csBetAmount.node.on("value_changed", this.onAmountChanged, this)
-
-        this.commitToLabelBet();
-        this.syncGameManager();
-
+        if (this.csBetAmount) {
+            this.csBetAmount.node.on("value_changed", this.onAmountChanged, this);
+        }
     }
 
     protected onEnable(): void {
+        this.scheduleOnce(() => {
+            this.initializeBetPanel();
+            this.commitToLabelBet();
+            this.syncGameManager();
+        }, 0);
+    }
 
+    private initializeBetPanel() {
+        this.ensureBetState();
+        const currentAmount = this.betAmount;
+
+        if (this.csBetSize) {
+            this.csBetSize.regenerateValues();
+        }
+
+        if (this.csBetLevel) {
+            this.csBetLevel.regenerateValues();
+        }
+
+        if (this.csBetBase) {
+            this.csBetBase.regenerateValues();
+        }
+
+        if (this.csBetAmount) {
+            this.csBetAmount.regenerateValues(true);
+        }
+
+        this.onAmountChanged(currentAmount);
+        if (this.csBetAmount) {
+            this.csBetAmount.value = currentAmount;
+        }
     }
 
     getFromLabelBet() {

@@ -4060,10 +4060,6 @@
     "messageBox": {
       "__id__": 103
     },
-    "betAmount": 12,
-    "stepBet": 4,
-    "minBet": 4,
-    "maxBet": 40,
     "bet": null,
     "_id": "08IZ7UfqxBkb/xTeJOOF0/"
   },
@@ -11109,10 +11105,6 @@
     "messageBox": {
       "__id__": 409
     },
-    "betAmount": 12,
-    "stepBet": 4,
-    "minBet": 4,
-    "maxBet": 40,
     "bet": null,
     "_id": "01xnVcGXZAiJJBi2st9/ea"
   },

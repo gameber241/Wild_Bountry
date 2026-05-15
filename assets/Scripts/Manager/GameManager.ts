@@ -106,7 +106,8 @@ export class GameManager extends Component {
     }
 
     private syncBetFromPanel(): void {
-        const panel = PanelBet.instance;
+        // const panel = PanelBet.instance; 
+        const panel = PanelBet.getInstance();
         if (!panel) {
             return;
         }
