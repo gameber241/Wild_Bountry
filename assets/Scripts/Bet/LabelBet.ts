@@ -3,6 +3,7 @@ import { MessageBox } from './MessageBox';
 import { PopEffect } from './PopEffect';
 import { PanelBet } from './PanelBet';
 import { currencyFormatSimple, GameManager } from '../Manager/GameManager';
+import { Spin } from '../Game/Spin';
 const { ccclass, property } = _decorator;
 
 @ccclass('LabelBet')
@@ -36,6 +37,7 @@ export class LabelBet extends Component {
     }
 
     increaseBet() {
+        if (Spin.instance.isSpin == true) return
         const panel = PanelBet.getInstance();
         if (!panel) return;
 
@@ -43,7 +45,7 @@ export class LabelBet extends Component {
         const list = panel.betAmounts;
         const currentAmount = panel.betAmount;
         let currentIndex = list.indexOf(currentAmount);
-        
+
         // Nếu không tìm thấy, tìm giá trị gần nhất
         if (currentIndex === -1) {
             let closest = 0;
@@ -70,6 +72,7 @@ export class LabelBet extends Component {
     }
 
     decreaseBet() {
+        if (Spin.instance.isSpin == true) return
         const panel = PanelBet.getInstance();
         if (!panel) return;
 
@@ -77,7 +80,7 @@ export class LabelBet extends Component {
         const list = panel.betAmounts;
         const currentAmount = panel.betAmount;
         let currentIndex = list.indexOf(currentAmount);
-        
+
         // Nếu không tìm thấy, tìm giá trị gần nhất
         if (currentIndex === -1) {
             let closest = 0;

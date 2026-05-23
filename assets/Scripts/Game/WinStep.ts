@@ -12,7 +12,7 @@ export class WinStep extends Component {
     }
 
     UpdateStepWin(stepWin) {
-        this.winStep = stepWin
+        this.winStep.string = stepWin
     }
 
     protected onDisable(): void {

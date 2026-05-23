@@ -290,7 +290,7 @@ export class GameManager extends Component {
         MultiplierCarouselFinal.instance.resetCombo()
         this.stepWinCurrent = 0
         this.UpdateStepWIn(0)
-        // TextBoxCombo.instant.playRandomText()
+        TextBoxGame.instant.playRandomText()
         this.stepOld = 1
         Spin.instance.isSpin = true
         // Waymanager.instance.resetWay()
@@ -488,7 +488,7 @@ export class GameManager extends Component {
             // SoundToggle.instance.PlaySymbolWin()
             this.stepOld = this.sampleJson.rounds[this.indexCurrentReel].multiplier
             MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
-            TextBoxGame.instant.PlayStepWin(r.baseWin, this.stepOld)
+            TextBoxGame.instant.PlayStepWin(this.stepWinCurrent, this.stepOld)
             ListReel.instance.HideMaskEffect()
             await GameManager.waitForSeconds(0.7);
             if (r.win.wild.length > 0) {
@@ -562,25 +562,38 @@ export class GameManager extends Component {
         const winQueue: Array<() => void> = [];
         console.log(r, " check")
         if (this.stepWinCurrent > 10 * this.betCurrent) {
-
+            let step = 0
+            if (this.stepWinCurrent < 15 * this.betCurrent) {
+                step = this.stepWinCurrent
+            }
+            else {
+                step = 10 * this.betCurrent
+            }
             winQueue.push(() => {
                 AudioManager.instance.PlayBigwin()
-                BigWin.instance.showBigWin(runNext, r.BigWin);
+                BigWin.instance.showBigWin(runNext, step);
             });
         }
 
         if (this.stepWinCurrent > 15 * this.betCurrent) {
-
+            let step = 0
+            if (this.stepWinCurrent < 25 * this.betCurrent) {
+                step = this.stepWinCurrent
+            }
+            else {
+                step = 10 * this.betCurrent
+            }
             winQueue.push(() => {
                 AudioManager.instance.PlaySupperwin()
-                BigWin.instance.showSuperWin(runNext, r.SuperWin);
+                BigWin.instance.showSuperWin(runNext, step);
             });
         }
 
         if (this.stepWinCurrent > 25 * this.betCurrent) {
+
             winQueue.push(() => {
                 AudioManager.instance.PlayMegaWin()
-                BigWin.instance.showMegaWin(runNext, r.MegaWin);
+                BigWin.instance.showMegaWin(runNext, this.stepWinCurrent);
             });
         }
 
