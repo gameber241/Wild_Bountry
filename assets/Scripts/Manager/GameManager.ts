@@ -16,6 +16,8 @@ import { SymbolFrameState } from '../Enum/SymbolFrameState';
 import { History } from '../Game/History';
 import { InfSymbol } from '../Game/InfSymbol';
 import { AudioManager } from '../Game/AudioManager';
+import { GameConfig } from '../Server/GameConfig';
+import sampleFreeSpinData from '../data_freespin.json';
 
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -253,20 +255,24 @@ export class GameManager extends Component {
     indexCurrentReel = 0
     public async PlaySpin() {
         try {
-            const betConfig = this.getSpinBetConfig();
-            const spinResult = await NetworkService.getInstance().spin({
-                bet: betConfig.bet,
-                betSize: betConfig.betSize,
-                betLevel: betConfig.betLevel,
-            });
+            if (GameConfig.spin.useSampleData) {
+                this.applySpinResult(sampleFreeSpinData);
+            } else {
+                const betConfig = this.getSpinBetConfig();
+                const spinResult = await NetworkService.getInstance().spin({
+                    bet: betConfig.bet,
+                    betSize: betConfig.betSize,
+                    betLevel: betConfig.betLevel,
+                });
 
-            this.applySpinResult(spinResult);
+                this.applySpinResult(spinResult);
 
-            try {
-                const profile = await NetworkService.getInstance().getProfile();
-                UserInfo.getInstance().updateProfile(profile);
-            } catch (profileError) {
-                console.warn('[GameManager] Refresh profile after spin failed:', profileError);
+                try {
+                    const profile = await NetworkService.getInstance().getProfile();
+                    UserInfo.getInstance().updateProfile(profile);
+                } catch (profileError) {
+                    console.warn('[GameManager] Refresh profile after spin failed:', profileError);
+                }
             }
         } catch (error) {
             console.error('[GameManager] Spin API error:', error);
@@ -423,8 +429,8 @@ export class GameManager extends Component {
         const byGrid = this.symBolArray[c][r] as Symbol;
 
         const reel = this.reels[c];
-        const byRow = reel?.symbols?.find(s => s?.node?.isValid && s.row === r) as Symbol;
-        if (byRow && (expectedFace === undefined || byRow.face === expectedFace)) {
+        const byRow = reel?.symbols?.find(s => s?.node?.isValid && s.row === r && s.node.active) as Symbol;
+        if (byRow) {
             this.symBolArray[c][r] = byRow;
             return byRow;
         }
@@ -433,7 +439,7 @@ export class GameManager extends Component {
     }
 
     FlipData() {
-        let dataRound = this.sampleJson.rounds[this.indexCurrentReel].win.wild;
+        let dataRound = this.sampleJson.rounds[this.indexCurrentReel].flips || [];
         this.scheduleOnce(() => {
             // SoundToggle.instance.PlayChangeSymbol()
 
@@ -448,7 +454,7 @@ export class GameManager extends Component {
     stepWinCurrent = 0
     async ClearData() {
         const r = this.sampleJson.rounds[this.indexCurrentReel];
-        if (r.win.normal.length > 0) {
+        if (r.win.normal.length > 0 || r.win.wild.length > 0) {
             ListReel.instance.ShowMaskEffect()
 
             // Waymanager.instance.animWay(r.win.ways)
@@ -456,18 +462,25 @@ export class GameManager extends Component {
             this.stepWinCurrent += r.baseWin
             this.UpdateStepWIn(this.stepWinCurrent)
             this.removeWinDuplicateFlip(r)
-            const flipPos = new Set(
-                r.win.wild.map(f => `${f.c}_${f.r}`)
-            );
+            
             let disposeCount = 0;
             const disposeTasks: Promise<void>[] = [];
             AudioManager.instance.Win()
-            for (const e of r.win.normal) {
-                const key = `${e.c}_${e.r}`;
-                if (flipPos.has(key)) {
-                    continue;
-                }
+            
+            const toClear = [...(r.clear?.normal || []), ...(r.clear?.wild || [])];
+            
+            // 1. Play win animation for flipped symbols FIRST, so they run concurrently with dispose
+            if (r.flips && r.flips.length > 0) {
+                r.flips.forEach(e => {
+                    const symbol = this.resolveSymbolByPosition(e.c, e.r);
+                    if (symbol) {
+                        symbol.node.setSiblingIndex(100);
+                        symbol.playiconAnimation(symbol.getNameWin(), false);
+                    }
+                });
+            }
 
+            for (const e of toClear) {
                 const symbol = this.resolveSymbolByPosition(e.c, e.r, e.i);
                 if (!symbol) {
                     continue;
@@ -490,13 +503,15 @@ export class GameManager extends Component {
             MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
             TextBoxGame.instant.PlayStepWin(this.stepWinCurrent, this.stepOld)
             ListReel.instance.HideMaskEffect()
-            await GameManager.waitForSeconds(0.7);
-            if (r.win.wild.length > 0) {
+            
+            // 2. NGAY SAU KHI NỔ XONG, FLIP LẬP TỨC!
+            if (r.flips && r.flips.length > 0) {
                 this.FlipData();
             }
 
             // Chỉ gọi AnimationWin cho các symbol thực sự win
-            r.win.normal.forEach(pos => {
+            const allWin = [...(r.win?.normal || []), ...(r.win?.wild || [])];
+            allWin.forEach(pos => {
                 const symbol = this.resolveSymbolByPosition(pos.c, pos.r, pos.i);
                 if (symbol) {
                     symbol.AnimationWin();

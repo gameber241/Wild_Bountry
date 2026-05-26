@@ -62,6 +62,7 @@ export class Symbol extends Component {
 
     col = 0; row = 0
     isInit = false;
+    isDisposed = false;
 
 
     uiTransform: UITransform = null;
@@ -317,6 +318,7 @@ export class Symbol extends Component {
         }
 
         // Destroy node
+        this.isDisposed = true;
         this.node.destroy();
         console.log(this)
     }
@@ -455,6 +457,7 @@ export class Symbol extends Component {
 
 
     public shakeNode() {
+        if (!this.node || !this.node.isValid) return;
         const originalPos = this.node.position.clone();
 
         const offset = 10; // độ lệch (px)

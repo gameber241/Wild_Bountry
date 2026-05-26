@@ -322,7 +322,7 @@ export abstract class ReelBase {
     // }
     public async cascadeDrop(dataAbove: any[]) {
         const aboveData = this.isHorizontal() ? dataAbove : [...dataAbove].reverse();
-        this.symbols = this.symbols.filter(s => s.node && s.node.isValid);
+        this.symbols = this.symbols.filter(s => s.node && s.node.isValid && !s.isDisposed);
         let space = 0;
         let min = this.VISIBLE_COUNT;
         let max = min * 2 - 1;
@@ -352,7 +352,8 @@ export abstract class ReelBase {
             Symbol.node.setPosition(this.getSymbolPosition(Symbol.reelIndex - createCount));
 
             Symbol.reel = this;
-            Symbol.InitSymbol(aboveData[i]);
+            const data = aboveData[i] || { i: Math.floor(Math.random() * 8) + 2, t: "n" };
+            Symbol.InitSymbol(data);
 
             Symbol.col = this.possitionReel;
             Symbol.row = i;
@@ -360,25 +361,24 @@ export abstract class ReelBase {
             newSymbols.push(Symbol);
         }
         for (let i = 0; i < existingSymbols.length; i++) {
-            await GameManager.waitForSeconds(0.05);
-            existingSymbols[i].DropToindex(0.05);
+            existingSymbols[i].DropToindex(0.1);
         }
 
-        await GameManager.waitForSeconds(0.3);
+        await GameManager.waitForSeconds(0.15);
 
         this.symbols.forEach(e => {
             e.shakeNode()
         })
         // delay tổng sau khi symbol cũ rơi xong
-        await GameManager.waitForSeconds(0.3);
+        await GameManager.waitForSeconds(0.15);
 
         for (let i = 0; i < newSymbols.length; i++) {
             this.symbols.push(newSymbols[i]);
             this.listSymbol.push(newSymbols[i].node)
 
-            await GameManager.waitForSeconds(0.05);
-            newSymbols[i].DropToindex(0.05);
+            newSymbols[i].DropToindex(0.1);
         }
+        await GameManager.waitForSeconds(0.15);
     }
 
     private createNewSymbol(): Symbol {
