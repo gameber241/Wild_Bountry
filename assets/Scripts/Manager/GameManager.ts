@@ -462,13 +462,13 @@ export class GameManager extends Component {
             this.stepWinCurrent += r.baseWin
             this.UpdateStepWIn(this.stepWinCurrent)
             this.removeWinDuplicateFlip(r)
-            
+
             let disposeCount = 0;
             const disposeTasks: Promise<void>[] = [];
             AudioManager.instance.Win()
-            
+
             const toClear = [...(r.clear?.normal || []), ...(r.clear?.wild || [])];
-            
+
             // 1. Play win animation for flipped symbols FIRST, so they run concurrently with dispose
             if (r.flips && r.flips.length > 0) {
                 r.flips.forEach(e => {
@@ -503,7 +503,7 @@ export class GameManager extends Component {
             MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
             TextBoxGame.instant.PlayStepWin(this.stepWinCurrent, this.stepOld)
             ListReel.instance.HideMaskEffect()
-            
+
             // 2. NGAY SAU KHI NỔ XONG, FLIP LẬP TỨC!
             if (r.flips && r.flips.length > 0) {
                 this.FlipData();
@@ -568,14 +568,10 @@ export class GameManager extends Component {
                         Spin.instance.isSpin = false;
                     }
                 }
-
             }
-
-
         };
         // danh sách animation cần chạy
         const winQueue: Array<() => void> = [];
-        console.log(r, " check")
         if (this.stepWinCurrent > 10 * this.betCurrent) {
             let step = 0
             if (this.stepWinCurrent < 15 * this.betCurrent) {
@@ -589,7 +585,6 @@ export class GameManager extends Component {
                 BigWin.instance.showBigWin(runNext, step);
             });
         }
-
         if (this.stepWinCurrent > 15 * this.betCurrent) {
             let step = 0
             if (this.stepWinCurrent < 25 * this.betCurrent) {
@@ -603,34 +598,27 @@ export class GameManager extends Component {
                 BigWin.instance.showSuperWin(runNext, step);
             });
         }
-
         if (this.stepWinCurrent > 25 * this.betCurrent) {
-
             winQueue.push(() => {
                 AudioManager.instance.PlayMegaWin()
                 BigWin.instance.showMegaWin(runNext, this.stepWinCurrent);
             });
         }
-
         // nếu không có animation nào
         if (winQueue.length === 0) {
             next();
             return;
         }
-
         let index = 0;
-
         const runNext = () => {
             if (index >= winQueue.length) {
                 next();
                 return;
             }
-
             const fn = winQueue[index];
             index++;
             fn();
         };
-        // bắt đầu chạy queue
         runNext();
     }
 
@@ -690,12 +678,10 @@ export class GameManager extends Component {
             if (i == index) {
                 if (e.spinesEff)
                     e.spinesEff.enabled = true
-                // tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 0 }).start()
             }
             else {
                 if (e.spinesEff)
                     e.spinesEff.enabled = false
-                // tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 255 }).start()
             }
         })
     }
@@ -709,7 +695,6 @@ export class GameManager extends Component {
                     s.playiconAnimation(s.getNameIdle(), true)
                 }
             })
-            // tween(e.maskEff.getComponent(UIOpacity)).to(0.3, { opacity: 0 }).start()
         })
     }
 
