@@ -293,6 +293,7 @@ export class Symbol extends Component {
     }
 
     public async Dispose(): Promise<void> {
+        this.frame.node.active = false
         this.node.setSiblingIndex(100);
         this.playiconAnimation(this.getNameWin(), false);
 

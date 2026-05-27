@@ -75,7 +75,7 @@ export class BigWin extends Component {
         // spine animation
         this.fxBigwin.setAnimation(0, appearAnim, false);
         this.fxBigwin.addAnimation(0, idleAnim, true);
-        AudioManager.instance.PlayScore()
+        // AudioManager.instance.PlayScore()
 
         // play number
         this.playTo(value, 3, activeLabel, callback);
