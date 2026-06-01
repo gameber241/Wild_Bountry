@@ -1,5 +1,6 @@
 import { _decorator, Component, ProgressBar, Label, Node, director } from 'cc';
 import { AuthService } from '../Server/AuthService';
+import { GameConfig } from '../Server/GameConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('LoadingController')
@@ -52,7 +53,13 @@ export class LoadingController extends Component {
 
     private async bootstrapLogin(): Promise<void> {
         const tokenFromUrl = AuthService.getQueryParam('token');
-        this.setStatus(tokenFromUrl ? 'Đang đăng nhập bằng token...' : 'Đang tự động đăng nhập...');
+        if (tokenFromUrl) {
+            this.setStatus('Đang đăng nhập bằng token...');
+        } else if (GameConfig.autoLogin.enabled) {
+            this.setStatus('Đang tự động đăng nhập...');
+        } else {
+            this.setStatus('Đang chờ token...');
+        }
 
         try {
             await AuthService.ensureAuthenticated();

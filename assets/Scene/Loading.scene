@@ -352,7 +352,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -308.019,
+      "y": -391.008,
       "z": 0
     },
     "_lrot": {
@@ -570,7 +570,7 @@
   {
     "__type__": "cc.Node",
     "_name": "Button",
-    "_objFlags": 0,
+    "_objFlags": 512,
     "__editorExtras__": {},
     "_parent": {
       "__id__": 2
@@ -595,8 +595,8 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
-      "y": -365.155,
+      "x": 4.635,
+      "y": -396.379,
       "z": 0
     },
     "_lrot": {
@@ -608,9 +608,9 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
+      "x": 1.839,
+      "y": 1.689,
+      "z": 1.824
     },
     "_mobility": 0,
     "_layer": 33554432,
@@ -707,9 +707,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_string": "Play game",
@@ -791,9 +791,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 168,
+      "g": 110,
+      "b": 43,
       "a": 255
     },
     "_spriteFrame": {
