@@ -279,7 +279,6 @@ class NetworkServiceImpl {
                 console.log("Free", payload.batchSpins)
 
                 payload.batchSpins.forEach((batchSpin: any, index: number) => {
-                    console.log(`[NetworkService] Processing batch spin ${index + 1}/${payload.batchSpins.length}`);
                     if (this.onBatchSpin) {
                         this.onBatchSpin(batchSpin);
                     } else {

@@ -247,11 +247,20 @@ export class GameManager extends Component {
 
     indexCurrentReel = 0
     public async PlaySpin() {
+        let betConfig = this.getSpinBetConfig();
+        let deductedDisplayBalance = false;
+
+        // Chỉ trừ tiền trên UI, KHÔNG sửa UserInfo
+        if (!this.isFreeSpin && !GameConfig.spin.useSampleData) {
+            this.balanceAfterBet =
+                Number(UserInfo.getInstance().balance) - Number(betConfig.bet);
+            director.emit("UPDATE_BALLANCE", this.balanceAfterBet.toFixed(2));
+        }
+
         try {
             if (GameConfig.spin.useSampleData) {
                 this.applySpinResult(sampleFreeSpinData);
             } else {
-                const betConfig = this.getSpinBetConfig();
                 const spinResult = await NetworkService.getInstance().spin({
                     bet: betConfig.bet,
                     betSize: betConfig.betSize,
@@ -259,22 +268,22 @@ export class GameManager extends Component {
                 });
 
                 this.applySpinResult(spinResult);
-
-                try {
-                    const profile = await NetworkService.getInstance().getProfile();
-                    UserInfo.getInstance().updateProfile(profile);
-                } catch (profileError) {
-                    console.warn('[GameManager] Refresh profile after spin failed:', profileError);
-                }
             }
         } catch (error) {
             console.error('[GameManager] Spin API error:', error);
-            if (this.isFreeSpin == true) return
+
+            // Nếu lỗi API thì trả UI về balance gốc từ server
+            if (deductedDisplayBalance) {
+                director.emit("UPDATE_BALLANCE", UserInfo.getInstance().balance);
+            }
+
+            if (this.isFreeSpin == true) return;
+
             Spin.instance.ActiveSpin();
             return;
         }
 
-        this.SpinGame()
+        this.SpinGame();
     }
 
     stepOld = 1
@@ -403,7 +412,7 @@ export class GameManager extends Component {
             this.reels[current].startRoll();
         }
 
-        await GameManager.waitForSeconds(0.16);
+        // await GameManager.waitForSeconds(0.16);
 
         for (let i = 0; i < this.reels.length; i++) {
             let current = i;
@@ -442,7 +451,19 @@ export class GameManager extends Component {
             symbol.FlipSymbol(e);
         });
     }
+    private balanceAfterBet: number | null = null;
+    private applyBalanceAfterSpinEnd() {
+        if (this.balanceAfterBet === null) {
+            return;
+        }
 
+        const finalBalance =
+            Number(this.balanceAfterBet) + Number(this.stepWinCurrent);
+
+        UserInfo.getInstance().updateBalance(finalBalance);
+
+        this.balanceAfterBet = null;
+    }
     stepWinCurrent = 0
     async ClearData() {
         const r = this.sampleJson.rounds[this.indexCurrentReel];
@@ -537,24 +558,26 @@ export class GameManager extends Component {
     ShowBigWin() {
         const r = this.sampleJson.rounds[this.indexCurrentReel];
         const next = () => {
-            if (this.CheckScratch4() == true) {
-                this.indexCurrentReel = 0
-                this.isFreeSpin = true
-                let free = this.getFreeSpin(this.GetNumberScratch())
-                FreeSpines.instance.playAnimation(free);
-                FreeSpines.instance.UpdateFreeSpinLb(free)
+            this.applyBalanceAfterSpinEnd();
 
+            if (this.CheckScratch4() == true) {
+                this.indexCurrentReel = 0;
+                this.isFreeSpin = true;
+                let free = this.getFreeSpin(this.GetNumberScratch());
+                FreeSpines.instance.playAnimation(free);
+                FreeSpines.instance.UpdateFreeSpinLb(free);
             }
             else {
                 if (this.isFreeSpin == true) {
-                    this.indexCurrentReel = 0
-                    this.PlayModeFreeSpin()
+                    this.indexCurrentReel = 0;
+                    this.PlayModeFreeSpin();
                 }
                 else {
                     this.indexCurrentReel = 0;
                     this.SetModeNormal();
+
                     if (Spin.instance.isAuto == true) {
-                        Spin.instance.AutoSpinNext()
+                        Spin.instance.AutoSpinNext();
                     }
                     else {
                         Spin.instance.isSpin = false;
@@ -715,7 +738,7 @@ export class GameManager extends Component {
     }
 
     GetTimeTurboStopSpin() {
-        if (this.turboMode == 0) return 0.15
+        if (this.turboMode == 0) return 0.3
         if (this.turboMode == 1) {
             // SoundToggle.instance.PlayScatchIdle()
             return 0

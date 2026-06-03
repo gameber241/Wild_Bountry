@@ -200,21 +200,72 @@ export abstract class ReelBase {
     }
 
 
-    stopRoll(result: any[]) {
-        this.isRolling = false;
+    // stopRoll(result: any[]) {
+    //     this.isRolling = false;
+    //     this._isStopping = true;
+    //     Tween.stopAllByTarget(this.reelProtect);
+
+    //     const total = this.symbols.length;
+    //     const visible = this.VISIBLE_COUNT;
+    //     const firstVisible = this.FIRST_VISIBLE;
+
+
+    //     this.symbols.sort((a, b) => a.reelIndex - b.reelIndex);
+    //     for (let i = 0; i < this.symbols.length; i++) {
+    //         this.symbols[i].reelIndex = i;
+    //     }
+    //     const indexMap = new Map<number, Symbol>();
+    //     for (let sym of this.symbols) {
+    //         indexMap.set(sym.reelIndex, sym);
+    //     }
+
+    //     for (let i = 0; i < visible; i++) {
+    //         const targetIndex = (firstVisible + i) % total;
+    //         const placeIndex = (targetIndex - visible + total) % total;
+    //         let s = indexMap.get(placeIndex);
+    //         if (!s) {
+    //             console.warn("⚠ Missing symbol at index:", placeIndex);
+    //             s = this.symbols[i % this.symbols.length];
+    //         }
+    //         const dataIndex = i
+    //         s.InitSymbol(result[dataIndex]);
+    //         s.col = this.possitionReel;
+    //         s.row = dataIndex;
+    //         if (GameManager.instance?.symBolArray) {
+    //             GameManager.instance.symBolArray[s.col][s.row] = s;
+    //         }
+    //     }
+
+    //     this.symbols.forEach(s => {
+    //         s.reelIndex += visible;
+    //         s.rollToIndex(this._delay * 3.5, Symbol.MoveType.STOP);
+    //     });
+    //     GameManager.waitForSeconds(5 * this._delay)
+    //     AudioManager.instance.ReelEnd()
+    //     // SoundToggle.instance?.PlaySymbolDrop();
+    // }
+    async stopRoll(result: any[]) {
         this._isStopping = true;
+
+        // Không tắt rolling ngay lập tức
+        // Cho reel chạy thêm một nhịp nhỏ để cảm giác mượt hơn
+        await GameManager.waitForSeconds(this._delay);
+
+        this.isRolling = false;
         Tween.stopAllByTarget(this.reelProtect);
 
         const total = this.symbols.length;
         const visible = this.VISIBLE_COUNT;
         const firstVisible = this.FIRST_VISIBLE;
 
-
         this.symbols.sort((a, b) => a.reelIndex - b.reelIndex);
+
         for (let i = 0; i < this.symbols.length; i++) {
             this.symbols[i].reelIndex = i;
         }
+
         const indexMap = new Map<number, Symbol>();
+
         for (let sym of this.symbols) {
             indexMap.set(sym.reelIndex, sym);
         }
@@ -222,27 +273,31 @@ export abstract class ReelBase {
         for (let i = 0; i < visible; i++) {
             const targetIndex = (firstVisible + i) % total;
             const placeIndex = (targetIndex - visible + total) % total;
+
             let s = indexMap.get(placeIndex);
+
             if (!s) {
                 console.warn("⚠ Missing symbol at index:", placeIndex);
                 s = this.symbols[i % this.symbols.length];
             }
-            const dataIndex = i
-            s.InitSymbol(result[dataIndex]);
+
+            s.InitSymbol(result[i]);
             s.col = this.possitionReel;
-            s.row = dataIndex;
+            s.row = i;
+
             if (GameManager.instance?.symBolArray) {
                 GameManager.instance.symBolArray[s.col][s.row] = s;
             }
         }
 
-        this.symbols.forEach(s => {
+        for (let s of this.symbols) {
             s.reelIndex += visible;
-            s.rollToIndex(this._delay * 3.5, Symbol.MoveType.STOP);
-        });
-        GameManager.waitForSeconds(5 * this._delay)
-        AudioManager.instance.ReelEnd()
-        // SoundToggle.instance?.PlaySymbolDrop();
+            s.rollToIndex(this._delay * 4, Symbol.MoveType.STOP);
+        }
+
+        await GameManager.waitForSeconds(this._delay * 4);
+
+        AudioManager.instance.ReelEnd();
     }
     changeSpeed(newDelay: number) {
         this._delay = newDelay;
