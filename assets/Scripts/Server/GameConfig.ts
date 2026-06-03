@@ -14,6 +14,7 @@ export const GameConfig = {
     },
 
     autoLogin: {
+        enabled: false,
         apiKey: 'd6b2f832-416b-4f8c-88a1-043179748e68',
         secretKey: 'd5df66f9-2be4-4c0c-b92b-5c62561ae88c',
         username: 'testuser1',

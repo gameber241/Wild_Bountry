@@ -32,7 +32,11 @@ export class AuthService {
             return this.loginWithUrlToken(tokenFromUrl);
         }
 
-        return this.loginWithAutoLogin();
+        if (GameConfig.autoLogin.enabled) {
+            return this.loginWithAutoLogin();
+        }
+
+        throw new Error('Auto login is disabled and no token found in URL');
     }
 
     private static async loginWithUrlToken(token: string): Promise<string> {

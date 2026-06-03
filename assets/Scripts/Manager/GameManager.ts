@@ -8,7 +8,6 @@ import { MultiplierCarouselFinal } from '../Game/MultiplierAnimator';
 import { TextBoxGame } from '../Game/TextBoxGame';
 import { BigWin } from '../Game/BigWin';
 import { FreeSpines } from '../Game/FreeSpines';
-import { AuthService } from '../Server/AuthService';
 import { NetworkService } from '../Server/NetworkService';
 import { UserInfo } from '../Server/UserInfo';
 import { PanelBet } from '../Bet/PanelBet';
@@ -77,16 +76,10 @@ export class GameManager extends Component {
         // EventBus.getInstance().on('profile:updated', this.onProfileUpdated, this);
     }
     protected start(): void {
-        void this.bootstrapGame();
+        this.bootstrapGame();
     }
 
-    private async bootstrapGame(): Promise<void> {
-        try {
-            await AuthService.ensureAuthenticated();
-        } catch (error) {
-            console.error('[GameManager] Auto login error:', error);
-        }
-
+    private bootstrapGame(): void {
         this.syncBetFromPanel();
         this.UpdateStepWIn(0)
         this.SetModeNormal()
