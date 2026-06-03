@@ -287,7 +287,6 @@ export class GameManager extends Component {
     stepOld = 1
     SpinGame() {
         if (!this.sampleJson || !Array.isArray(this.sampleJson.rounds) || this.sampleJson.rounds.length === 0) {
-            console.error('[GameManager] Missing spin result');
             Spin.instance.ActiveSpin();
             return;
         }
@@ -632,7 +631,7 @@ export class GameManager extends Component {
                 }
             })
         })
-        return indexScratch >= 3
+        return indexScratch >= 2
     }
 
     public CheckReelFull3Scratch() {
@@ -644,7 +643,7 @@ export class GameManager extends Component {
                     indexScratch++
                 }
             }
-            if (indexScratch >= 2) return i
+            if (indexScratch >= 1) return i
         }
     }
 
@@ -657,7 +656,7 @@ export class GameManager extends Component {
                 }
             })
         })
-        if (indexScratch >= 4) return true;
+        if (indexScratch >= 3) return true;
     }
 
 
@@ -767,8 +766,8 @@ export class GameManager extends Component {
     totalFreeSpin = 0
 
     getFreeSpin(scratch: number): number {
-        if (scratch < 4) return 0;
-        this.totalFreeSpin += 10 + (scratch - 4) * 2;
+        if (scratch < 3) return 0;
+        this.totalFreeSpin += 10 + (scratch - 3) * 2;
         return this.totalFreeSpin
     }
     GetDataFreeSpin() {
