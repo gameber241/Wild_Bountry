@@ -17,7 +17,7 @@ export abstract class ReelBase {
     protected totalSize = 0;
     protected halfSize = 0;
 
-    _delay = 0.04;
+    _delay = 0.02;
     protected _isStopping = false;
     protected _remainSteps = 0;
 

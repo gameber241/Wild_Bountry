@@ -337,6 +337,7 @@ export class GameManager extends Component {
             await GameManager.waitForSeconds(i == 0 ? 0 : this.GetTimeTurboStopSpin());
 
         }
+        await GameManager.waitForSeconds(this.GetTimeTurboStopSpin() * 7);
         let stopped = 0;
         const phase1 = indexReel + 1
         for (let i = 0; i <= indexReel; i++) {
@@ -370,13 +371,13 @@ export class GameManager extends Component {
         while (current < this.reels.length) {
             const reel = this.reels[current];
             AudioManager.instance.ReelSLow()
-            reel.changeSpeed(0.2)
+            reel.changeSpeed(0.1)
             ListReel.instance.ShowMaskEffect()
             this.ShowAllScratch(current)
             reel.ShowAllSymbol()
             ListReel.instance.ShowVfxLight(current)
             await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
-            reel._delay = 0.06
+            reel._delay = 0.02
             reel.stopRoll(grid[current]);
             ListReel.instance.HideVfxLight()
             await GameManager.waitForSeconds(1);
@@ -410,6 +411,8 @@ export class GameManager extends Component {
         }
 
         // await GameManager.waitForSeconds(0.16);
+        await GameManager.waitForSeconds(this.GetTimeTurboStopSpin() * 7);
+
 
         for (let i = 0; i < this.reels.length; i++) {
             let current = i;
@@ -735,7 +738,7 @@ export class GameManager extends Component {
     }
 
     GetTimeTurboStopSpin() {
-        if (this.turboMode == 0) return 0.3
+        if (this.turboMode == 0) return 0.1
         if (this.turboMode == 1) {
             // SoundToggle.instance.PlayScatchIdle()
             return 0
