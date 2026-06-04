@@ -334,12 +334,9 @@ export class GameManager extends Component {
         for (let i = 0; i < this.reels.length; i++) {
             let current = i;
             this.reels[current].startRoll();
-            await GameManager.waitForSeconds(0.05);
+            await GameManager.waitForSeconds(i == 0 ? 0 : this.GetTimeTurboStopSpin());
 
         }
-        await GameManager.waitForSeconds(this.GetTimeTurboScratchStart());
-
-
         let stopped = 0;
         const phase1 = indexReel + 1
         for (let i = 0; i <= indexReel; i++) {

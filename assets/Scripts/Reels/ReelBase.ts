@@ -17,7 +17,7 @@ export abstract class ReelBase {
     protected totalSize = 0;
     protected halfSize = 0;
 
-    _delay = 0.05;
+    _delay = 0.04;
     protected _isStopping = false;
     protected _remainSteps = 0;
 
@@ -154,52 +154,189 @@ export abstract class ReelBase {
     }
 
 
+    // startRoll() {
+    //     this._isStopping = false;
+    //     this.isRolling = true;
+
+    //     // Chuẩn hóa số lượng symbol trước khi spin
+    //     this.normalizeSymbolCount();
+
+    //     this.rearrangeSymbols();
+
+    //     this.symbols.forEach(e => {
+    //         e.icon.node.layer = Layers.Enum.DEFAULT;
+    //         e.frame.node.layer = Layers.Enum.DEFAULT;
+    //         e.isInit = false;
+    //         e.node.active = true;
+    //     });
+
+    //     console.log(this.symbols.length);
+
+    //     tween(this.reelProtect)
+    //         .call(() => {
+    //             if (this.isRolling === false) return;
+
+    //             for (let s of this.symbols) {
+    //                 s.reelIndex += 1;
+
+    //                 if (s.reelIndex >= this.symbols.length) {
+    //                     s.reelIndex = 0;
+
+    //                     if (!this._isStopping) {
+    //                         s.ResetSymbol();
+    //                     }
+
+    //                     s.node.position = this.getSymbolPosition(-1);
+    //                 }
+
+    //                 s.rollToIndex(this._delay, Symbol.MoveType.MOVING);
+    //             }
+    //         })
+    //         .delay(this._delay)
+    //         .call(() => { })
+    //         .union()
+    //         .repeatForever()
+    //         .start();
+    // }
     startRoll() {
         this._isStopping = false;
         this.isRolling = true;
 
-        // Chuẩn hóa số lượng symbol trước khi spin
-        this.normalizeSymbolCount();
+        const token = ++this._spinToken;
 
-        this.rearrangeSymbols();
+        // Chỉ normalize khi số lượng symbol bị sai.
+        // Không gọi rearrangeSymbols ở đây, vì nó làm đổi lại layout sau lần spin trước.
+        if (
+            this.symbols.length !== this.numberSymbols ||
+            this.listSymbol.length !== this.numberSymbols
+        ) {
+            this.normalizeSymbolCount();
+            this.rearrangeSymbols();
+        }
 
         this.symbols.forEach(e => {
             e.icon.node.layer = Layers.Enum.DEFAULT;
             e.frame.node.layer = Layers.Enum.DEFAULT;
+
+            // Không reset UI/symbol ở đây.
+            // Chỉ đánh dấu để khi symbol rời màn hình mới random.
             e.isInit = false;
             e.node.active = true;
+            e.node.setSiblingIndex(1);
         });
 
-        console.log(this.symbols.length);
+        Tween.stopAllByTarget(this.reelProtect);
+
+        for (let s of this.symbols) {
+            if (s?.node?.isValid) {
+                Tween.stopAllByTarget(s.node);
+            }
+        }
+
+        const startBackTime = 0.08;
+        const startReturnTime = 0.16;
+        const startTotalTime = startBackTime + startReturnTime;
 
         tween(this.reelProtect)
             .call(() => {
-                if (this.isRolling === false) return;
+                if (!this.isRolling || token !== this._spinToken) return;
 
+                // START chỉ là hiệu ứng nhích lên.
+                // Tuyệt đối không gọi moveOneStep ở đây.
                 for (let s of this.symbols) {
-                    s.reelIndex += 1;
+                    if (!s || !s.node || !s.node.isValid) continue;
 
-                    if (s.reelIndex >= this.symbols.length) {
-                        s.reelIndex = 0;
-
-                        if (!this._isStopping) {
-                            s.ResetSymbol();
-                        }
-
-                        s.node.position = this.getSymbolPosition(-1);
-                    }
-
-                    s.rollToIndex(this._delay, Symbol.MoveType.MOVING);
+                    s.rollToIndex(startReturnTime, Symbol.MoveType.START);
                 }
             })
-            .delay(this._delay)
-            .call(() => { })
+            .delay(startTotalTime)
+            .call(() => {
+                if (!this.isRolling || token !== this._spinToken) return;
+
+                this.startMoveLoop(token);
+            })
+            .start();
+    }
+    private _spinToken = 0;
+    private moveOneStep(time: number, type: string) {
+        if (!this.isRolling && type !== Symbol.MoveType.STOP) return;
+
+        for (let s of this.symbols) {
+            if (!s || !s.node || !s.node.isValid) continue;
+
+            const oldIndex = s.reelIndex;
+
+            s.reelIndex += 1;
+
+            let wasRecycled = false;
+
+            if (s.reelIndex >= this.symbols.length) {
+                s.reelIndex = 0;
+                wasRecycled = true;
+
+                if (!this._isStopping) {
+                    s.ResetSymbol();
+                }
+
+                s.node.setPosition(this.getSymbolPosition(-1));
+            }
+
+            const useMoveVisual = this.shouldUseMoveVisual(
+                oldIndex,
+                s.reelIndex,
+                wasRecycled
+            );
+
+            s.rollToIndex(time, type, useMoveVisual);
+        }
+    }
+    startMoveLoop(token: number = this._spinToken) {
+        Tween.stopAllByTarget(this.reelProtect);
+
+        const moveTime = this._delay;
+
+        tween(this.reelProtect)
+            .call(() => {
+                if (!this.isRolling || this._isStopping || token !== this._spinToken) return;
+
+                this.moveOneStep(moveTime, Symbol.MoveType.MOVING);
+            })
+            .delay(moveTime)
             .union()
             .repeatForever()
             .start();
     }
+    private isVisibleIndex(index: number): boolean {
+        const total = this.symbols.length;
+        const normalizedIndex = ((index % total) + total) % total;
 
+        for (let i = 0; i < this.VISIBLE_COUNT; i++) {
+            const visibleIndex = (this.FIRST_VISIBLE + i) % total;
 
+            if (normalizedIndex === visibleIndex) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private shouldUseMoveVisual(oldIndex: number, newIndex: number, wasRecycled: boolean): boolean {
+        // Symbol vừa bị đưa từ cuối reel lên ngoài màn hình.
+        if (wasRecycled) return true;
+
+        const oldVisible = this.isVisibleIndex(oldIndex);
+        const newVisible = this.isVisibleIndex(newIndex);
+
+        // Đang ở ngoài màn hình.
+        if (!oldVisible && !newVisible) return true;
+
+        // Vừa đi ra khỏi vùng visible.
+        if (oldVisible && !newVisible) return true;
+
+        // Còn đang trong vùng visible thì không đổi sang move.
+        return false;
+    }
     // stopRoll(result: any[]) {
     //     this.isRolling = false;
     //     this._isStopping = true;
@@ -245,14 +382,28 @@ export abstract class ReelBase {
     //     // SoundToggle.instance?.PlaySymbolDrop();
     // }
     async stopRoll(result: any[]) {
+        if (this._isStopping) return;
+
         this._isStopping = true;
 
-        // Không tắt rolling ngay lập tức
-        // Cho reel chạy thêm một nhịp nhỏ để cảm giác mượt hơn
+        // Tăng token để hủy START / MOVING loop cũ nếu còn đang chờ delay.
+        const token = ++this._spinToken;
+
+        // Cho reel chạy nốt một nhịp nhỏ, tránh dừng cụt.
         await GameManager.waitForSeconds(this._delay);
 
+        if (token !== this._spinToken) return;
+
         this.isRolling = false;
+
         Tween.stopAllByTarget(this.reelProtect);
+
+        // Dừng tween hiện tại của từng symbol trước khi tính stop.
+        for (let s of this.symbols) {
+            if (s?.node?.isValid) {
+                Tween.stopAllByTarget(s.node);
+            }
+        }
 
         const total = this.symbols.length;
         const visible = this.VISIBLE_COUNT;
@@ -270,6 +421,7 @@ export abstract class ReelBase {
             indexMap.set(sym.reelIndex, sym);
         }
 
+        // Gán result vào các symbol chuẩn bị rơi vào vùng visible.
         for (let i = 0; i < visible; i++) {
             const targetIndex = (firstVisible + i) % total;
             const placeIndex = (targetIndex - visible + total) % total;
@@ -290,12 +442,20 @@ export abstract class ReelBase {
             }
         }
 
+        const stopTime = Math.max(this._delay * 5, 0.22);
+
         for (let s of this.symbols) {
+            if (!s || !s.node || !s.node.isValid) continue;
+
             s.reelIndex += visible;
-            s.rollToIndex(this._delay * 4, Symbol.MoveType.STOP);
+            const useMoveVisual = !this.isVisibleIndex(s.reelIndex);
+
+            s.rollToIndex(stopTime, Symbol.MoveType.STOP, useMoveVisual);
         }
 
-        await GameManager.waitForSeconds(this._delay * 4);
+        await GameManager.waitForSeconds(stopTime + 0.12);
+
+        if (token !== this._spinToken) return;
 
         AudioManager.instance.ReelEnd();
     }

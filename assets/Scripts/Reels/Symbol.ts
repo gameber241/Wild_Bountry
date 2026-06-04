@@ -148,12 +148,16 @@ export class Symbol extends Component {
     }
 
     SetUISymbolNormal() {
+        this._moveVisualEnabled = false;
+
         this.UpdateFrame();
         this.playiconAnimation(this.getNameIdle(), true);
-        this.playFrameAnimation(this.getNameIdle(), true)
+        this.playFrameAnimation(this.getNameIdle(), true);
     }
 
     SetUiMove() {
+        if (this._moveVisualEnabled) return;
+        this._moveVisualEnabled = true;
         const name = this.getNameMove();
         this.playiconAnimation(name, true);
         this.playFrameAnimation(name, true);
@@ -176,7 +180,7 @@ export class Symbol extends Component {
         this.SetUISymbolNormal();
 
     }
-
+    private _moveVisualEnabled = false;
     setRandomFace() {
         const faces = [
             SymbolType.Cowboy,
@@ -197,33 +201,67 @@ export class Symbol extends Component {
 
     }
 
-    rollToIndex(time: number = 0.2, type: string = Symbol.MoveType.MOVING) {
+    rollToIndex(
+        time: number = 0.2,
+        type: string = Symbol.MoveType.MOVING,
+        useMoveVisual: boolean = false
+    ) {
+        if (!this.reel || !this.node || !this.node.isValid) return;
 
-        const newPosition = this.reel.getSymbolPosition(this.reelIndex);
         Tween.stopAllByTarget(this.node);
 
-        // ❗ CHỈ stop tween khi STOP, không stop khi MOVING
-        if (type === Symbol.MoveType.STOP) {
+        if (type === Symbol.MoveType.START) {
+            // START chỉ nhích lấy đà, KHÔNG chuyển sang UI move.
+            const currentPos = this.node.position.clone();
+            const isHorizontal = this.reel.isHorizontal();
+
+            const backOffset = 28;
+
+            const backPos = isHorizontal
+                ? currentPos.clone().add3f(-backOffset, 0, 0)
+                : currentPos.clone().add3f(0, backOffset, 0);
+
+            return tween(this.node)
+                .to(0.08, { position: backPos }, { easing: "sineOut" })
+                .to(time, { position: currentPos }, { easing: "quadIn" })
+                .start();
         }
+
+        const newPosition = this.reel.getSymbolPosition(this.reelIndex);
+
+        let option: any = undefined;
+
         if (type === Symbol.MoveType.MOVING) {
-            this.SetUiMove()
+            option = { easing: "linear" };
+
+            // Chỉ symbol ngoài màn hình / vừa recycle mới đổi sang move.
+            if (useMoveVisual) {
+                this.SetUiMove();
+            }
+        }
+
+        if (type === Symbol.MoveType.STOP) {
+            option = { easing: "quadOut" };
+
+            // STOP có thể cho move để cảm giác đang rơi rồi dừng.
+            if (useMoveVisual) {
+                this.SetUiMove();
+            }
         }
 
         return tween(this.node)
-            .to(time, { position: newPosition })
+            .to(time, { position: newPosition }, option)
             .call(() => {
+                if (!this.reel || !this.node || !this.node.isValid) return;
 
-                this.reelIndex =
-                    this.reelIndex % this.reel.symbols.length;
+                this.reelIndex = this.reelIndex % this.reel.symbols.length;
 
                 if (type === Symbol.MoveType.STOP) {
-                    this.exploAnim();
+                    this.exploAnim(3);
                 }
-
             })
             .start();
     }
-
 
     DropToindex(time: number = 0.2) {
         if (!this.reel) return;
@@ -240,7 +278,9 @@ export class Symbol extends Component {
 
 
 
-    exploAnim(bounce = 2) {
+    exploAnim(bounce = 3) {
+        if (!this.reel || !this.node || !this.node.isValid) return;
+
         const basePos = this.reel.getSymbolPosition(this.reelIndex);
         const isHorizontal = this.reel.isHorizontal();
 
@@ -248,18 +288,24 @@ export class Symbol extends Component {
             ? basePos.clone().add3f(bounce, 0, 0)
             : basePos.clone().add3f(0, bounce, 0);
 
+        Tween.stopAllByTarget(this.node);
+
         tween(this.node)
             .set({ position: basePos })
-            .to(0.08, { position: upPos }, { easing: 'sineOut' })
-            .to(0.08, { position: basePos }, { easing: 'sineIn' })
+            .to(0.06, { position: upPos }, { easing: "sineOut" })
+            .to(0.08, { position: basePos }, { easing: "sineIn" })
             .call(() => {
-                if (this.isInit == false) {
-                    this.node.active = false
+                if (!this.node || !this.node.isValid) return;
+
+                if (this.isInit === false) {
+                    this.node.active = false;
+                    return;
                 }
-                const animNameIdle = this.getNameIdle()
-                this.playiconAnimation(animNameIdle, true)
-                if (this.face == SymbolType.SCRATCH || this.face == SymbolType.WILD) {
-                    this.node.setSiblingIndex(90)
+
+                this.SetUISymbolNormal();
+
+                if (this.face === SymbolType.SCRATCH || this.face === SymbolType.WILD) {
+                    this.node.setSiblingIndex(90);
                 }
             })
             .start();
