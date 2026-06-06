@@ -215,14 +215,14 @@ export class Symbol extends Component {
             const currentPos = this.node.position.clone();
             const isHorizontal = this.reel.isHorizontal();
 
-            const backOffset = 28;
+            const backOffset = 10;
 
             const backPos = isHorizontal
                 ? currentPos.clone().add3f(-backOffset, 0, 0)
                 : currentPos.clone().add3f(0, backOffset, 0);
 
             return tween(this.node)
-                .to(0.08, { position: backPos }, { easing: "sineOut" })
+                // .to(0.08, { position: backPos }, { easing: "sineOut" })
                 .to(time, { position: currentPos }, { easing: "quadIn" })
                 .start();
         }
@@ -298,7 +298,7 @@ export class Symbol extends Component {
                 if (!this.node || !this.node.isValid) return;
 
                 if (this.isInit === false) {
-                    this.node.active = false;
+                    // this.node.active = false;
                     return;
                 }
 
@@ -394,112 +394,11 @@ export class Symbol extends Component {
 
     }
 
-
-    // @property(Label)
-    // titleInf1: Label = null
-
-
-    // @property(Label)
-    // titleInf2: Label = null
-
-    // @property(sp.Skeleton) iconInf: sp.Skeleton = null!;
-    // @property(sp.Skeleton) frameInf: sp.Skeleton = null!;
-
-    // @property(Node)
-    // infNode: Node = null
-
-    // @property(Node)
-    // bg: Node = null
-
-    // @property(Node)
-    // frane: Node = null
-
-    // @property(Layout)
-    // containtNode: Layout = null
-
-    // @property(Node)
-    // numberNode: Node = null
-
-    // @property(Node)
-    // textWild: Node = null;
-
-    // @property(Node)
-    // textScratch: Node = null
-
     ShowInf() {
         if (Spin.instance.isAuto == true) return
         if (Spin.instance.isSpin == true) return
         console.log("den day")
         GameManager.instance.infSynbol.Show({ i: this.face, t: this.frameState }, this.icon.node.worldPosition.clone())
-        // GameManager.instance.maskInf.active = true
-        // this.infNode.active = true
-        // this.titleInf1.string = SymbolPayoutConfig[this.face].count
-        // this.titleInf2.string = SymbolPayoutConfig[this.face].value
-
-        // this.iconInf.setSkin(this.SkinMap[this.face] ?? "default");
-        // this.iconInf.setAnimation(0, this.getNameIdle(), true)
-
-
-
-        // if (this.face != Symbol.WILD && this.face != Symbol.SCRATCH) {
-        //     this.textWild.active = false
-        //     this.numberNode.active = true
-        //     this.textScratch.active = false
-        //     this.bg.getComponent(UITransform).setContentSize(300, 100 * this.stackSize + 30)
-        //     this.frane.getComponent(UITransform).setContentSize(300, 100 * this.stackSize + 30)
-
-        //     if (this.node.worldPosition.x > 400) {
-        //         this.containtNode.horizontalDirection = Layout.HorizontalDirection.RIGHT_TO_LEFT;
-        //         this.containtNode.node.parent.setPosition(-70, 0, 0)
-        //     }
-        //     else {
-        //         this.containtNode.horizontalDirection = Layout.HorizontalDirection.LEFT_TO_RIGHT;
-        //         this.containtNode.node.parent.setPosition(70, 0, 0)
-        //     }
-
-        // }
-        // if (this.face == Symbol.WILD) {
-        //     this.textWild.active = true
-        //     this.numberNode.active = false
-        //     this.textScratch.active = false
-        //     this.bg.getComponent(UITransform).setContentSize(500, 100 * this.stackSize + 30)
-        //     this.frane.getComponent(UITransform).setContentSize(500, 100 * this.stackSize + 30)
-        //     if (this.node.worldPosition.x > 400) {
-        //         this.containtNode.horizontalDirection = Layout.HorizontalDirection.RIGHT_TO_LEFT;
-        //         this.containtNode.node.parent.setPosition(-170, 0, 0)
-        //     }
-        //     else {
-        //         this.containtNode.horizontalDirection = Layout.HorizontalDirection.LEFT_TO_RIGHT;
-        //         this.containtNode.node.parent.setPosition(172, 0, 0)
-        //     }
-        // }
-        // if (this.face == Symbol.SCRATCH) {
-        //     this.textWild.active = false
-        //     this.numberNode.active = false
-        //     this.textScratch.active = true
-        //     this.bg.getComponent(UITransform).setContentSize(600, 100 * this.stackSize + 30)
-        //     this.frane.getComponent(UITransform).setContentSize(600, 100 * this.stackSize + 30)
-        //     if (this.node.worldPosition.x > 400) {
-        //         this.containtNode.horizontalDirection = Layout.HorizontalDirection.RIGHT_TO_LEFT;
-        //         this.containtNode.node.parent.setPosition(-225, 0, 0)
-        //     }
-        //     else {
-        //         this.containtNode.horizontalDirection = Layout.HorizontalDirection.LEFT_TO_RIGHT;
-        //         this.containtNode.node.parent.setPosition(225, 0, 0)
-        //     }
-        // }
-
-        // if (this.frameState == SymbolFrameState.SILVER) {
-        //     this.frameInf.setSkin("Border_Silver")
-
-        // }
-
-        // if (this.frameState == SymbolFrameState.GOLD) {
-        //     this.frameInf.setSkin("Border_Gold")
-        // }
-
-        // this.frameInf.setAnimation(0, this.getNameIdle(), true)
-
     }
 
 

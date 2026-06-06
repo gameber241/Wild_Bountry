@@ -50,97 +50,168 @@ export class TextBoxGame extends Component {
 
     // ===== Runtime =====
     private randomTextTween: Tween<Node> | null = null;
+    private isRandomTextPlaying = false;
+    private randomTextScheduleCallback: (() => void) | null = null;
 
     protected start(): void {
         TextBoxGame.instant = this;
-        this.playRandomText();
+        this.playRandomText(true);
+    }
+
+    protected onDisable(): void {
+        this.stopRandomText();
+    }
+
+    protected onDestroy(): void {
+        this.stopRandomText();
+
+        if (TextBoxGame.instant === this) {
+            TextBoxGame.instant = null!;
+        }
     }
 
     // =====================================================
-    // Random Text
+    // Random Text Control
     // =====================================================
 
-    /**
-     * Dừng hoàn toàn animation text random đang chạy
-     */
     private stopRandomText(): void {
-        // Stop tween đang được giữ reference
         if (this.randomTextTween) {
             this.randomTextTween.stop();
             this.randomTextTween = null;
         }
 
-        // Stop tất cả tween gắn với node này (phòng trường hợp còn tween khác)
         Tween.stopAllByTarget(this.textRandom.node);
 
-        // Hủy tất cả scheduleOnce đang chờ
-        this.unscheduleAllCallbacks();
-    }
+        if (this.randomTextScheduleCallback) {
+            this.unschedule(this.randomTextScheduleCallback);
+            this.randomTextScheduleCallback = null;
+        }
 
-    /**
-     * Hiển thị text Scratch
-     */
-    playScratch(): void {
-        this.stopRandomText();
-
-        this.totalWin.active = false;
-        this.textRandom.node.active = true;
-        this.textRandom.spriteFrame = this.textScratch;
+        this.isRandomTextPlaying = false;
     }
 
     /**
      * Chạy text random liên tục.
-     * Nếu bị gọi khi animation cũ đang chạy thì sẽ tự stop và restart từ đầu.
+     *
+     * forceRestart = false:
+     * - Nếu random text đang chạy thì không cắt tween hiện tại.
+     *
+     * forceRestart = true:
+     * - Dừng animation cũ và chạy lại từ đầu.
      */
-    playRandomText(): void {
-        // Quan trọng: luôn stop animation cũ trước khi chạy mới
-        this.stopRandomText();
+    playRandomText(forceRestart: boolean = false): void {
+        if (!this.textRandom || this.texts.length <= 0) {
+            return;
+        }
+
+        // Nếu đang chạy rồi thì để tween hiện tại chạy hết
+        if (this.isRandomTextPlaying && !forceRestart) {
+            return;
+        }
+
+        if (forceRestart) {
+            this.stopRandomText();
+        }
+
+        this.isRandomTextPlaying = true;
 
         this.totalWin.active = false;
         this.textRandom.node.active = true;
+        this.stepWin.active = false;
+        this.textTotalWin.active = false;
 
         const random = randomRangeInt(0, this.texts.length);
         this.textRandom.spriteFrame = this.texts[random];
 
-        let startPos: Vec3;
-        let endPos: Vec3;
-        let duration = 6;
-        let useTween = true;
+        const config = this.getRandomTextMoveConfig(random);
 
-        if (random === 0) {
-            startPos = new Vec3(160.37, 0, 0);
-            endPos = new Vec3(-156, 0, 0);
+        if (!config.useTween) {
+            this.playStaticRandomText();
+            return;
         }
-        else if (random === 1) {
-            startPos = new Vec3(95, 0, 0);
-            endPos = new Vec3(-74, 0, 0);
-        }
-        else if (random === 2 || random === 3 || random === 4) {
-            startPos = new Vec3(116, 0, 0);
-            endPos = new Vec3(-130, 0, 0);
-        }
-        else {
-            // Text đứng yên trong 3 giây
-            useTween = false;
-            this.textRandom.node.setPosition(0, 30, 0);
 
-            this.scheduleOnce(() => {
+        this.textRandom.node.setPosition(config.startPos);
+
+        this.randomTextTween = tween(this.textRandom.node)
+            .to(config.duration, { position: config.endPos })
+            .call(() => {
+                this.randomTextTween = null;
+                this.isRandomTextPlaying = false;
                 this.playRandomText();
-            }, 3);
+            });
+
+        this.randomTextTween.start();
+    }
+
+    private getRandomTextMoveConfig(index: number): {
+        useTween: boolean;
+        startPos: Vec3;
+        endPos: Vec3;
+        duration: number;
+    } {
+        const duration = 6;
+
+        if (index === 0) {
+            return {
+                useTween: true,
+                startPos: new Vec3(160.37, 0, 0),
+                endPos: new Vec3(-156, 0, 0),
+                duration,
+            };
         }
 
-        if (useTween) {
-            this.textRandom.node.setPosition(startPos);
-
-            this.randomTextTween = tween(this.textRandom.node)
-                .to(duration, { position: endPos })
-                .call(() => {
-                    this.randomTextTween = null;
-                    this.playRandomText();
-                });
-
-            this.randomTextTween.start();
+        if (index === 1) {
+            return {
+                useTween: true,
+                startPos: new Vec3(95, 0, 0),
+                endPos: new Vec3(-74, 0, 0),
+                duration,
+            };
         }
+
+        if (index === 2 || index === 3 || index === 4) {
+            return {
+                useTween: true,
+                startPos: new Vec3(116, 0, 0),
+                endPos: new Vec3(-130, 0, 0),
+                duration,
+            };
+        }
+
+        return {
+            useTween: false,
+            startPos: Vec3.ZERO,
+            endPos: Vec3.ZERO,
+            duration: 0,
+        };
+    }
+
+    private playStaticRandomText(): void {
+        this.textRandom.node.setPosition(0, 30, 0);
+
+        this.randomTextScheduleCallback = () => {
+            this.randomTextScheduleCallback = null;
+            this.isRandomTextPlaying = false;
+            this.playRandomText();
+        };
+
+        this.scheduleOnce(this.randomTextScheduleCallback, 3);
+    }
+
+    // =====================================================
+    // Scratch Text
+    // =====================================================
+
+    playScratch(): void {
+        this.stopRandomText();
+
+        this.totalWin.active = false;
+        this.stepWin.active = false;
+        this.textTotalWin.active = false;
+
+        this.textRandom.node.active = true;
+        this.textRandom.spriteFrame = this.textScratch;
+        this.textRandom.node.setPosition(0, 30, 0);
     }
 
     // =====================================================
@@ -154,68 +225,75 @@ export class TextBoxGame extends Component {
         this.textRandom.node.active = false;
         this.stepWin.active = false;
         this.textTotalWin.active = false;
-        this.comboAnim.node.parent!.active = false;
+
+        const comboParent = this.comboAnim.node.parent;
+        if (comboParent) {
+            comboParent.active = false;
+        }
 
         if (multi === 1) {
-            AudioManager.instance.WinBatHit()
+            AudioManager.instance.WinBatHit();
+
             this.stepWin.active = true;
             this.lbScore.string = currencyFormatSimple.format(step);
+            return;
         }
-        else {
-            let result = step * multi;
-            result = Number(result.toFixed(2));
 
-            this.scheduleOnce(() => {
-                const comboParent = this.comboAnim.node.parent!;
+        this.playMultiplierStepWin(step, multi);
+    }
 
-                comboParent.active = true;
-                comboParent.setScale(1, 1, 1);
-                comboParent.setPosition(0, 0, 0);
+    private playMultiplierStepWin(step: number, multi: number): void {
+        this.scheduleOnce(() => {
+            const comboParent = this.comboAnim.node.parent;
+            if (!comboParent) {
+                this.showStepScore(step);
+                return;
+            }
 
-                this.comboAnim.string = 'X' + multi;
+            const centerNode = MultiplierCarouselFinal.instance.getCenterNode();
 
-                // Đặt đúng world position
-                comboParent.setWorldPosition(
-                    MultiplierCarouselFinal.instance
-                        .getCenterNode()
-                        .worldPosition.clone()
-                );
+            comboParent.active = true;
+            comboParent.setScale(1, 1, 1);
+            comboParent.setPosition(0, 0, 0);
+            comboParent.setWorldPosition(centerNode.worldPosition.clone());
 
-                // Tween di chuyển
-                tween(comboParent)
-                    .to(0.25, { position: new Vec3(0, 455, 0) })
-                    .delay(0.2)
-                    .to(0.25, { position: new Vec3(0, 0, 0) })
-                    .call(() => {
-                        comboParent.active = false;
+            this.comboAnim.string = 'X' + multi;
 
-                        if (multi < 8) {
-                            AudioManager.instance.WinBat1()
+            tween(comboParent)
+                .to(0.25, { position: new Vec3(0, 455, 0) })
+                .delay(0.2)
+                .to(0.25, { position: new Vec3(0, 0, 0) })
+                .call(() => {
+                    comboParent.active = false;
+                    this.playBoxWinAnimation(multi);
+                })
+                .start();
 
-                            this.box.setAnimation(0, 'lv1', false);
-                        }
-                        else {
-                            AudioManager.instance.WinBat2()
+            tween(comboParent)
+                .to(0.25, { scale: new Vec3(2, 2, 2) })
+                .delay(0.2)
+                .to(0.25, { scale: new Vec3(1, 1, 1) })
+                .call(() => {
+                    comboParent.active = false;
+                })
+                .start();
 
-                            this.box.setAnimation(0, 'lv2', false);
-                        }
-                    })
-                    .start();
+            this.showStepScore(step);
+        }, 1);
+    }
 
-                // Tween scale
-                tween(comboParent)
-                    .to(0.25, { scale: new Vec3(2, 2, 2) })
-                    .delay(0.2)
-                    .to(0.25, { scale: new Vec3(1, 1, 1) })
-                    .call(() => {
-                        comboParent.active = false;
-                    })
-                    .start();
+    private showStepScore(step: number): void {
+        this.stepWin.active = true;
+        this.lbScore.string = currencyFormatSimple.format(step);
+    }
 
-                // Hiển thị step score
-                this.stepWin.active = true;
-                this.lbScore.string = currencyFormatSimple.format(step);
-            }, 1);
+    private playBoxWinAnimation(multi: number): void {
+        if (multi < 8) {
+            AudioManager.instance.WinBat1();
+            this.box.setAnimation(0, 'lv1', false);
+        } else {
+            AudioManager.instance.WinBat2();
+            this.box.setAnimation(0, 'lv2', false);
         }
     }
 
@@ -229,7 +307,6 @@ export class TextBoxGame extends Component {
         this.totalWin.active = true;
         this.textRandom.node.active = false;
         this.stepWin.active = false;
-        this.textTotalWin.active = false;
 
         this.textTotalWin.active = true;
         this.lbScore.string = currencyFormatSimple.format(total);

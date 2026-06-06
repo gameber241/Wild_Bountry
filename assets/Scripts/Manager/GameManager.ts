@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, Node, Sprite, SpriteFrame, tween, UIOpacity, Vec3, director, resources, JsonAsset, Camera } from 'cc';
+import { _decorator, Camera, Component, director, Node, Sprite, SpriteFrame, tween } from 'cc';
 import { ReelBase } from '../Reels/ReelBase';
 import { SymbolType } from '../Enum/ESymbolFace';
 import { Symbol } from '../Reels/Symbol';
@@ -18,105 +18,597 @@ import { AudioManager } from '../Game/AudioManager';
 import { GameConfig } from '../Server/GameConfig';
 import sampleFreeSpinData from '../data_freespin.json';
 
+const { ccclass, property } = _decorator;
+
 export const currencyFormatSimple = new Intl.NumberFormat('en-US', {
     style: 'decimal',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
 });
 
-export const waitForSeconds = (s: number): Promise<void> => {
-    // Dùng tween thay vì setTimeout để đồng bộ với engine game loop
-    const tempObj = { v: 0 };
-    return new Promise(resolve => {
-        tween(tempObj)
-            .delay(s)
-            .call(() => resolve())
-            .start();
-    });
-}
-const { ccclass, property } = _decorator;
+type BetConfig = {
+    bet: number;
+    betSize: number;
+    betLevel: number;
+    betBase: number;
+};
+
+type GridCell = {
+    i: number;
+    f: number;
+    [key: string]: any;
+};
+
+type GridPosition = {
+    c: number;
+    r: number;
+    i?: number;
+    [key: string]: any;
+};
+
+type RoundData = {
+    grid: GridCell[][];
+    above: GridCell[][];
+    flips: GridPosition[];
+    clear?: {
+        normal?: GridPosition[];
+        wild?: GridPosition[];
+    };
+    win: {
+        normal?: GridPosition[];
+        wild?: GridPosition[];
+        positions: GridPosition[];
+        ways: any[];
+        stepWin: number;
+        [key: string]: any;
+    };
+    baseWin?: number;
+    multiplier: number;
+    hasNext: boolean;
+    [key: string]: any;
+};
+
+type SpinPayload = {
+    rounds: RoundData[];
+    batchSpins?: SpinPayload[];
+    batchSummary?: {
+        totalWin?: number;
+        [key: string]: any;
+    };
+    [key: string]: any;
+};
 
 @ccclass('GameManager')
 export class GameManager extends Component {
+    public static instance: GameManager = null;
 
     @property({ type: ReelBase })
-    reels: ReelBase[] = []
-
-    public static instance: GameManager = null
-
-    public stoppedCount = 0
+    public reels: ReelBase[] = [];
 
     @property(Camera)
-    cameraMain: Camera = null;
+    public cameraMain: Camera = null;
 
     @property(History)
-    his: History = null
+    public his: History = null;
 
     @property(InfSymbol)
-    infSynbol: InfSymbol = null;
+    public infSynbol: InfSymbol = null;
 
+    @property(Sprite)
+    public bgReels: Sprite = null;
 
-    turboMode = 0
-    //data Freespin
-    dataFreespin: any = null
-    otherHeight = 0
-    AnimFirstGame() {
-        this.otherHeight = this.cameraMain.orthoHeight
-        this.cameraMain.orthoHeight = this.otherHeight + 100
-        tween(this.cameraMain)
-            .delay(0.5)
-            .to(1, { orthoHeight: this.otherHeight }).start()
+    @property(SpriteFrame)
+    public bgReelsSp1: SpriteFrame[] = [];
+
+    @property(Node)
+    public bgDown: Node = null;
+
+    @property(Node)
+    public bgUp: Node = null;
+
+    @property(Node)
+    public bgFreeSpin: Node = null;
+
+    @property(Node)
+    public walletNode: Node = null;
+
+    @property(Node)
+    public btnNode: Node = null;
+
+    @property(Node)
+    public uiFreewin: Node = null;
+
+    @property(Node)
+    public wayFree: Node = null;
+
+    public stoppedCount = 0;
+    public turboMode = 0;
+
+    public betCurrent = 0;
+    public betSizeCurrent = 0;
+    public betLevelCurrent = 0;
+    public betBaseCurrent = 0;
+
+    public stepWin = 0;
+    public stepWinCurrent = 0;
+    public stepOld = 1;
+
+    public sampleJson: SpinPayload = null;
+    public dataFreespin: { payload: SpinPayload } | null = null;
+
+    public indexCurrentReel = 0;
+    public indexCurrentFreeSpin = 0;
+    public totalFreeSpin = 0;
+    public isFreeSpin = false;
+
+    public isShowSetting = false;
+    public isShowFooter = false;
+    public priceOffset = 2000;
+    public priceMax = 20000;
+
+    public symBolArray: Symbol[][] = [];
+    private otherHeight = 0;
+    private balanceAfterBet: number | null = null;
+
+    // ---------------------------------------------------------------------
+    // Lifecycle
+    // ---------------------------------------------------------------------
+
+    protected onLoad(): void {
+        GameManager.instance = this;
+        this.playFirstGameCameraAnim();
     }
 
-
-    onLoad() {
-        this.AnimFirstGame()
-        GameManager.instance = this
-        // Listen to profile updates
-        // EventBus.getInstance().on('profile:updated', this.onProfileUpdated, this);
-    }
     protected start(): void {
         this.bootstrapGame();
     }
 
+    protected onDestroy(): void {
+        if (GameManager.instance === this) {
+            GameManager.instance = null;
+        }
+    }
+
     private bootstrapGame(): void {
+        this.reels = ListReel.instance?.reels ?? this.reels;
         this.syncBetFromPanel();
-        this.UpdateStepWIn(0)
-        this.SetModeNormal()
-        this.initGrid()
-        this.reels = ListReel.instance.reels
+        this.UpdateStepWIn(0);
+        this.SetModeNormal();
+        this.initGrid();
     }
 
-    betCurrent: number = 0
-    betSizeCurrent: number = 0
-    betLevelCurrent: number = 0
-    betBaseCurrent: number = 0
-    stepWin: number = 0
-    UpdateBetCurrent(bet: number) {
-        this.betCurrent = bet
-        director.emit("BET_CURRENT", bet)
+    private playFirstGameCameraAnim(): void {
+        if (!this.cameraMain) return;
+
+        this.otherHeight = this.cameraMain.orthoHeight;
+        this.cameraMain.orthoHeight = this.otherHeight + 100;
+
+        tween(this.cameraMain)
+            .delay(0.5)
+            .to(1, { orthoHeight: this.otherHeight })
+            .start();
     }
 
-    UpdateBetConfig(betAmount: number, betSize: number, betLevel: number, betBase: number) {
-        this.betCurrent = betAmount
-        this.betSizeCurrent = betSize
-        this.betLevelCurrent = betLevel
-        this.betBaseCurrent = betBase
-        director.emit("BET_CURRENT", betAmount)
+    private initGrid(): void {
+        const cols = 7;
+        this.symBolArray = [];
+
+        for (let col = 0; col < cols; col++) {
+            const rows = col === 0 ? 4 : 5;
+            this.symBolArray[col] = Array.from({ length: rows }, () => null);
+        }
     }
 
-    private syncBetFromPanel(): void {
-        // const panel = PanelBet.instance; 
-        const panel = PanelBet.getInstance();
-        if (!panel) {
+    // ---------------------------------------------------------------------
+    // Public API kept for other components
+    // ---------------------------------------------------------------------
+
+    public UpdateBetCurrent(bet: number): void {
+        this.betCurrent = bet;
+        director.emit('BET_CURRENT', bet);
+    }
+
+    public UpdateBetConfig(betAmount: number, betSize: number, betLevel: number, betBase: number): void {
+        this.betCurrent = betAmount;
+        this.betSizeCurrent = betSize;
+        this.betLevelCurrent = betLevel;
+        this.betBaseCurrent = betBase;
+
+        director.emit('BET_CURRENT', betAmount);
+    }
+
+    public UpdateStepWIn(stepWin: number): void {
+        this.stepWin = stepWin;
+        director.emit('UPDATE_STEPWIN', stepWin);
+    }
+
+    public async PlaySpin(): Promise<void> {
+        const betConfig = this.getSpinBetConfig();
+        let deductedDisplayBalance = false;
+
+        if (!this.isFreeSpin && !GameConfig.spin.useSampleData) {
+            this.balanceAfterBet = Number(UserInfo.getInstance().balance) - Number(betConfig.bet);
+            deductedDisplayBalance = true;
+            director.emit('UPDATE_BALLANCE', this.balanceAfterBet.toFixed(2));
+        }
+
+        try {
+            const spinResult = GameConfig.spin.useSampleData
+                ? sampleFreeSpinData
+                : await NetworkService.getInstance().spin({
+                    bet: betConfig.bet,
+                    betSize: betConfig.betSize,
+                    betLevel: betConfig.betLevel,
+                });
+
+            this.applySpinResult(spinResult);
+        } catch (error) {
+            console.error('[GameManager] Spin API error:', error);
+
+            if (deductedDisplayBalance) {
+                director.emit('UPDATE_BALLANCE', UserInfo.getInstance().balance);
+                this.balanceAfterBet = null;
+            }
+
+            if (!this.isFreeSpin) {
+                Spin.instance.ActiveSpin();
+            }
             return;
         }
-        console.log(panel.betAmount)
+
+        this.SpinGame();
+    }
+
+    public SpinGame(): void {
+        if (!this.hasValidCurrentRound()) {
+            Spin.instance.ActiveSpin();
+            return;
+        }
+
+        this.prepareSpinState();
+
+        const round = this.getCurrentRound();
+        this.SetModeNormal();
+        this.GenerateMap(round.grid);
+    }
+
+    public GenerateMap(grid: GridCell[][]): void {
+        if (this.CheckScratch()) {
+            this.RollDataScratch(grid);
+            return;
+        }
+
+        this.RollDataNormal(grid);
+    }
+
+    public async RollDataNormal(grid: GridCell[][]): Promise<void> {
+        AudioManager.instance.ReelStart();
+
+        for (let i = 0; i < this.reels.length; i++) {
+            await GameManager.waitForSeconds(i === 0 ? 0 : this.GetTimeTurboStopSpin());
+            this.reels[i].startRoll();
+        }
+
+        await GameManager.waitForSeconds(this.GetTimeTurboStopSpin() * 7);
+
+        for (let i = 0; i < this.reels.length; i++) {
+            this.reels[i].stopRoll(grid[i]);
+            await GameManager.waitForSeconds(i === 0 ? 0 : this.GetTimeTurboStopSpin());
+        }
+
+        await GameManager.waitForSeconds(0.5);
+        await this.ClearData();
+    }
+
+    public async RollDataScratch(grid: GridCell[][]): Promise<void> {
+        try {
+            AudioManager.instance.ReelStart();
+
+            const firstScratchReelIndex = this.CheckReelFull3Scratch();
+
+            if (firstScratchReelIndex < 0 || firstScratchReelIndex >= this.reels.length - 1) {
+                await this.RollDataNormal(grid);
+                return;
+            }
+
+            for (let i = 0; i < this.reels.length; i++) {
+                this.reels[i].startRoll();
+                await GameManager.waitForSeconds(i === 0 ? 0 : this.GetTimeTurboStopSpin());
+            }
+
+            await GameManager.waitForSeconds(this.GetTimeTurboStopSpin() * 7);
+
+            for (let i = 0; i <= firstScratchReelIndex; i++) {
+                this.reels[i].stopRoll(grid[i]);
+                await GameManager.waitForSeconds(this.GetTimeTurboScratchStart());
+            }
+
+            this.playScratchIdleOnStoppedReels(firstScratchReelIndex);
+            await this.stopScratchPhase2(firstScratchReelIndex, grid);
+        } catch (error) {
+            console.error('[GameManager] RollDataScratch error:', error);
+            this.forceUnlockSpinAfterError();
+        }
+    }
+    private forceUnlockSpinAfterError(): void {
+        ListReel.instance?.HideMaskEffect?.();
+        ListReel.instance?.HideVfxLight?.();
+
+        if (this.cameraMain) {
+            tween(this.cameraMain)
+                .to(0.3, { orthoHeight: this.otherHeight })
+                .start();
+        }
+
+        this.indexCurrentReel = 0;
+
+        if (!this.isFreeSpin) {
+            Spin.instance.ActiveSpin();
+        }
+
+        Spin.instance.isSpin = false;
+    }
+    public FlipData(): void {
+        const flips = this.getCurrentRound()?.flips ?? [];
+
+        flips.forEach(flip => {
+            const symbol = this.resolveSymbolByPosition(flip.c, flip.r);
+            if (!symbol) return;
+
+            symbol.FlipSymbol(flip);
+        });
+    }
+
+    public async ClearData(): Promise<void> {
+        const round = this.getCurrentRound();
+        if (!round) {
+            this.finishCurrentSpin();
+            return;
+        }
+
+        if (this.hasWin(round)) {
+            console.log("den day")
+            await this.playWinCascade(round);
+        }
+
+        if (round.hasNext) {
+            this.indexCurrentReel++;
+            await this.ClearData();
+            return;
+        }
+
+        this.ShowBigWin();
+    }
+
+    public ShowBigWin(): void {
+        const finishSpin = () => this.finishCurrentSpin();
+        let index = 0;
+        let winQueue: Array<() => void> = [];
+
+        const runNext = () => {
+            if (index >= winQueue.length) {
+                finishSpin();
+                return;
+            }
+
+            const fn = winQueue[index];
+            index++;
+            fn();
+        };
+
+        winQueue = this.createBigWinQueue(runNext);
+
+        if (winQueue.length === 0) {
+            finishSpin();
+            return;
+        }
+
+        runNext();
+    }
+    CheckScratch(): boolean {
+        const round = this.sampleJson?.rounds?.[this.indexCurrentReel];
+        const grid = round?.grid;
+
+        return this.countScratchInGrid(grid) >= 2;
+    }
+
+    public CheckReelFull3Scratch(): number {
+        const round = this.sampleJson?.rounds?.[this.indexCurrentReel];
+        const grid = round?.grid;
+
+        if (!Array.isArray(grid)) {
+            return -1;
+        }
+
+        for (let col = 0; col < grid.length; col++) {
+            const column = grid[col];
+
+            if (!Array.isArray(column)) continue;
+
+            for (let row = 0; row < column.length; row++) {
+                if (Number(column[row]?.i) === SymbolType.SCRATCH) {
+                    return col;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private hasFreeSpinData(): boolean {
+        return Array.isArray(this.dataFreespin?.payload?.batchSpins)
+            && this.dataFreespin.payload.batchSpins.length > 0;
+    }
+    public CheckScratch4(): boolean {
+        return this.GetNumberScratch() >= 3;
+    }
+
+    public GetNumberScratch(): number {
+        return this.reels.reduce((total, reel) => {
+            const reelScratchCount = reel.symbols.filter(symbol => {
+                if (!symbol) return false;
+                if (!symbol.node?.isValid) return false;
+                if (!symbol.node.active) return false;
+
+                return symbol.face === SymbolType.SCRATCH;
+            }).length;
+
+            return total + reelScratchCount;
+        }, 0);
+    }
+    public playAnimReelScratch(index: number): void {
+        this.reels.forEach((reel, reelIndex) => {
+            if (reel.spinesEff) {
+                reel.spinesEff.enabled = reelIndex === index;
+            }
+        });
+    }
+
+    public ShowAllReef(iSpine = false): void {
+        if (iSpine) return;
+
+        this.reels.forEach(reel => {
+            reel.symbols.forEach(symbol => {
+                if (symbol.face === SymbolType.SCRATCH) {
+                    symbol.playiconAnimation(symbol.getNameIdle(), true);
+                }
+            });
+        });
+    }
+
+    public ShowAllScratch(index: number): void {
+        this.reels.forEach((reel, reelIndex) => {
+            if (reelIndex >= index) return;
+
+            reel.symbols.forEach(symbol => {
+                if (symbol.face === SymbolType.SCRATCH) {
+                    symbol.node.setSiblingIndex(99);
+                }
+            });
+        });
+    }
+
+    public removeWinDuplicateFlip(round: RoundData): void {
+        if (!round?.win?.positions) return;
+
+        const seen = new Set<string>();
+        round.win.positions = round.win.positions.filter(position => {
+            const key = `${position.c}_${position.r}`;
+            if (seen.has(key)) return false;
+
+            seen.add(key);
+            return true;
+        });
+    }
+
+    public getFreeSpin(scratch: number): number {
+        if (scratch < 3) return 0;
+
+        this.totalFreeSpin += 10 + (scratch - 3) * 2;
+        return this.totalFreeSpin;
+    }
+
+    public GetDataFreeSpin(): SpinPayload | null {
+        const batchSpins = this.dataFreespin?.payload?.batchSpins ?? [];
+
+        if (this.indexCurrentFreeSpin >= batchSpins.length) {
+            return null;
+        }
+
+        return batchSpins[this.indexCurrentFreeSpin];
+    }
+
+    public PlayModeFreeSpin(): void {
+        const dataFree = this.GetDataFreeSpin();
+
+        if (!dataFree) {
+            this.finishFreeSpinMode();
+            return;
+        }
+
+        this.SetModeFreeSpin();
+        this.indexCurrentReel = 0;
+        this.indexCurrentFreeSpin++;
+        this.totalFreeSpin--;
+        this.isFreeSpin = true;
+
+        TextBoxGame.instant.playRandomText();
+        this.stepOld = 1;
+        Spin.instance.isSpin = true;
+
+        this.sampleJson = dataFree;
+        FreeSpines.instance.UpdateFreeSpinLb(this.totalFreeSpin);
+        this.GenerateMap(this.getCurrentRound().grid);
+    }
+
+    public SetModeNormal(): void {
+        AudioManager.instance.PlaybgNormal();
+
+        this.bgReels.spriteFrame = this.bgReelsSp1[0];
+        this.bgReels.node.setPosition(0, 117, 0);
+        this.bgDown.active = true;
+        this.bgFreeSpin.active = false;
+        this.walletNode.setPosition(21.22, -354);
+        this.btnNode.active = true;
+        this.bgUp.active = true;
+        this.wayFree.active = false;
+        this.uiFreewin.active = false;
+    }
+
+    public SetModeFreeSpin(): void {
+        AudioManager.instance.PlaybgFree();
+
+        this.bgReels.spriteFrame = this.bgReelsSp1[1];
+        this.bgReels.node.setPosition(0, 41, 0);
+        this.bgDown.active = false;
+        this.bgFreeSpin.active = true;
+        this.walletNode.setPosition(21.22, -596.327);
+        this.btnNode.active = false;
+        this.bgUp.active = false;
+        this.wayFree.active = true;
+        this.uiFreewin.active = true;
+    }
+
+    public extractBalanceFromPayload(payload: any): number | null {
+        if (!payload) return null;
+
+        const data = payload.data ? payload.data : payload;
+        const wallets = Array.isArray(data.wallets) ? data.wallets : [];
+
+        if (wallets[0]?.balance !== undefined) {
+            return Number(wallets[0].balance);
+        }
+
+        if (data.user?.balance !== undefined) {
+            return Number(data.user.balance);
+        }
+
+        if (data.balance !== undefined) {
+            return Number(data.balance);
+        }
+
+        console.warn('[GameManager] No balance found in payload');
+        return null;
+    }
+
+    // ---------------------------------------------------------------------
+    // Spin data
+    // ---------------------------------------------------------------------
+
+    private syncBetFromPanel(): void {
+        const panel = PanelBet.getInstance();
+        if (!panel) return;
+
         this.UpdateBetConfig(panel.betAmount, panel.betSize, panel.betLevel, panel.betBetbase);
     }
 
-    private getSpinBetConfig() {
-        if (this.betCurrent <= 0 || this.betSizeCurrent <= 0 || this.betLevelCurrent <= 0 || this.betBaseCurrent <= 0) {
+    private getSpinBetConfig(): BetConfig {
+        const hasInvalidBet = this.betCurrent <= 0
+            || this.betSizeCurrent <= 0
+            || this.betLevelCurrent <= 0
+            || this.betBaseCurrent <= 0;
+
+        if (hasInvalidBet) {
             this.syncBetFromPanel();
         }
 
@@ -133,46 +625,45 @@ export class GameManager extends Component {
         const normalizedPayload = this.normalizeSpinPayload(payload);
 
         this.sampleJson = normalizedPayload;
-        this.dataFreespin = Array.isArray(normalizedPayload.batchSpins)
+        this.dataFreespin = Array.isArray(normalizedPayload.batchSpins) && normalizedPayload.batchSpins.length > 0
             ? { payload: normalizedPayload }
             : null;
+
         this.indexCurrentReel = 0;
         this.indexCurrentFreeSpin = 0;
     }
 
-    private normalizeSpinPayload(payload: any) {
+    private normalizeSpinPayload(payload: any): SpinPayload {
         return {
             ...payload,
             rounds: Array.isArray(payload?.rounds)
-                ? payload.rounds.map((round) => this.normalizeRound(round))
+                ? payload.rounds.map((round: any) => this.normalizeRound(round))
                 : [],
             batchSpins: Array.isArray(payload?.batchSpins)
-                ? payload.batchSpins.map((spin) => ({
+                ? payload.batchSpins.map((spin: any) => ({
                     ...spin,
                     rounds: Array.isArray(spin?.rounds)
-                        ? spin.rounds.map((round) => this.normalizeRound(round))
+                        ? spin.rounds.map((round: any) => this.normalizeRound(round))
                         : [],
                 }))
                 : [],
         };
     }
 
-    private normalizeRound(round: any) {
+    private normalizeRound(round: any): RoundData {
         return {
             ...round,
-            grid: Array.isArray(round?.grid)
-                ? round.grid.map((column) => Array.isArray(column)
-                    ? column.map((cell) => this.normalizeCell(cell))
-                    : [])
-                : [],
-            above: Array.isArray(round?.above)
-                ? round.above.map((column) => Array.isArray(column)
-                    ? column.map((cell) => this.normalizeCell(cell))
-                    : [])
-                : [],
+            grid: this.normalizeGrid(round?.grid),
+            above: this.normalizeGrid(round?.above),
             flips: Array.isArray(round?.flips) ? round.flips : [],
+            clear: {
+                normal: Array.isArray(round?.clear?.normal) ? round.clear.normal : [],
+                wild: Array.isArray(round?.clear?.wild) ? round.clear.wild : [],
+            },
             win: {
                 ...(round?.win ?? {}),
+                normal: Array.isArray(round?.win?.normal) ? round.win.normal : [],
+                wild: Array.isArray(round?.win?.wild) ? round.win.wild : [],
                 positions: Array.isArray(round?.win?.positions) ? round.win.positions : [],
                 ways: Array.isArray(round?.win?.ways) ? round.win.ways : [],
                 stepWin: Number(round?.win?.stepWin ?? 0),
@@ -182,7 +673,16 @@ export class GameManager extends Component {
         };
     }
 
-    private normalizeCell(cell: any) {
+    private normalizeGrid(grid: any): GridCell[][] {
+        if (!Array.isArray(grid)) return [];
+
+        return grid.map((column: any) => {
+            if (!Array.isArray(column)) return [];
+            return column.map(cell => this.normalizeCell(cell));
+        });
+    }
+
+    private normalizeCell(cell: any): GridCell {
         if (!cell || typeof cell !== 'object') {
             return cell;
         }
@@ -194,712 +694,376 @@ export class GameManager extends Component {
         };
     }
 
-    extractBalanceFromPayload(payload: any): number | null {
-
-        if (!payload) {
-            return null;
-        }
-
-        const data = payload.data ? payload.data : payload;
-        // Check wallets array first
-        const wallets = Array.isArray(data.wallets) ? data.wallets : [];
-
-        if (wallets.length > 0 && wallets[0] && wallets[0].balance !== undefined) {
-            return Number(wallets[0].balance);
-        }
-
-        // Check user.balance
-        if (data.user && data.user.balance !== undefined) {
-            return Number(data.user.balance);
-        }
-
-        // Check direct balance
-        if (data.balance !== undefined) {
-            return Number(data.balance);
-        }
-
-        console.warn('[GameManager] No balance found in payload');
-        return null;
+    private hasValidCurrentRound(): boolean {
+        return Array.isArray(this.sampleJson?.rounds)
+            && this.sampleJson.rounds.length > 0
+            && !!this.sampleJson.rounds[this.indexCurrentReel];
     }
 
-
-    protected onDestroy(): void {
-        // EventBus.getInstance().off('profile:updated', this.onProfileUpdated);
+    private getCurrentRound(): RoundData | null {
+        return this.sampleJson?.rounds?.[this.indexCurrentReel] ?? null;
     }
 
+    // ---------------------------------------------------------------------
+    // Roll / scratch animation
+    // ---------------------------------------------------------------------
 
-
-    symBolArray: Symbol[][]
-
-    initGrid() {
-        const cols = 7
-        this.symBolArray = []
-        for (let col = 0; col < cols; col++) {
-            const rows = (col == 0) ? 4 : 5
-            this.symBolArray[col] = Array.from(
-                { length: rows },
-                () => null
-            )
-        }
-    }
-
-    sampleJson = null;
-
-    indexCurrentReel = 0
-    public async PlaySpin() {
-        let betConfig = this.getSpinBetConfig();
-        let deductedDisplayBalance = false;
-
-        // Chỉ trừ tiền trên UI, KHÔNG sửa UserInfo
-        if (!this.isFreeSpin && !GameConfig.spin.useSampleData) {
-            this.balanceAfterBet =
-                Number(UserInfo.getInstance().balance) - Number(betConfig.bet);
-            director.emit("UPDATE_BALLANCE", this.balanceAfterBet.toFixed(2));
-        }
-
+    private async stopScratchPhase2(index: number, grid: GridCell[][]): Promise<void> {
         try {
-            if (GameConfig.spin.useSampleData) {
-                this.applySpinResult(sampleFreeSpinData);
-            } else {
-                const spinResult = await NetworkService.getInstance().spin({
-                    bet: betConfig.bet,
-                    betSize: betConfig.betSize,
-                    betLevel: betConfig.betLevel,
-                });
+            this.zoomCameraForScratch();
+            TextBoxGame.instant.playScratch();
 
-                this.applySpinResult(spinResult);
+            for (let current = index + 1; current < this.reels.length; current++) {
+                const reel = this.reels[current];
+
+                if (!reel) {
+                    continue;
+                }
+
+                AudioManager.instance.ReelSLow();
+                reel.changeSpeed(0.1);
+
+                ListReel.instance.ShowMaskEffect();
+                this.ShowAllScratch(current);
+                reel.ShowAllSymbol();
+                ListReel.instance.ShowVfxLight(current);
+
+                await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
+
+                reel._delay = 0.02;
+                reel.stopRoll(grid[current] ?? []);
+
+                ListReel.instance.HideVfxLight();
+
+                await GameManager.waitForSeconds(1);
+                reel.HideSymbolDifScratch();
             }
-        } catch (error) {
-            console.error('[GameManager] Spin API error:', error);
 
-            // Nếu lỗi API thì trả UI về balance gốc từ server
-            if (deductedDisplayBalance) {
-                director.emit("UPDATE_BALLANCE", UserInfo.getInstance().balance);
-            }
+            await GameManager.waitForSeconds(0.4);
+            this.ShowAllReef(true);
 
-            if (this.isFreeSpin == true) return;
-
-            Spin.instance.ActiveSpin();
-            return;
-        }
-
-        this.SpinGame();
-    }
-
-    stepOld = 1
-    SpinGame() {
-        if (!this.sampleJson || !Array.isArray(this.sampleJson.rounds) || this.sampleJson.rounds.length === 0) {
-            Spin.instance.ActiveSpin();
-            return;
-        }
-
-        this.infSynbol.hide()
-        MultiplierCarouselFinal.instance.resetCombo()
-        this.stepWinCurrent = 0
-        this.UpdateStepWIn(0)
-        TextBoxGame.instant.playRandomText()
-        this.stepOld = 1
-        Spin.instance.isSpin = true
-        // Waymanager.instance.resetWay()
-        const round = this.sampleJson.rounds[this.indexCurrentReel];
-        console.log(round)
-        this.SetModeNormal();
-        const grid = round.grid;
-        this.GenerateMap(grid);
-    }
-
-    UpdateStepWIn(stepWin) {
-        this.stepWin = stepWin
-        director.emit("UPDATE_STEPWIN", stepWin)
-
-    }
-    GenerateMap(grid: any[][]) {
-        if (this.CheckScratch() == false)
-            this.RollDataNormal(grid)
-        else {
-            this.RollDataScratch(grid)
-
-        }
-    }
-
-    async RollDataScratch(grid) {
-        AudioManager.instance.ReelStart()
-        const indexReel = this.CheckReelFull3Scratch();
-        if (indexReel === this.reels.length - 1) {
-            this.RollDataNormal(grid);
-            return;
-        }
-        AudioManager.instance.ReelStart()
-
-        for (let i = 0; i < this.reels.length; i++) {
-            let current = i;
-            this.reels[current].startRoll();
-            await GameManager.waitForSeconds(i == 0 ? 0 : this.GetTimeTurboStopSpin());
-
-        }
-        await GameManager.waitForSeconds(this.GetTimeTurboStopSpin() * 7);
-        let stopped = 0;
-        const phase1 = indexReel + 1
-        for (let i = 0; i <= indexReel; i++) {
-            this.reels[i].stopRoll(grid[i])
-            await GameManager.waitForSeconds(this.GetTimeTurboScratchStart());
-
-            if (++stopped !== phase1) continue;
-            this.stopPhase2(indexReel, grid);
-            for (let j = 0; j <= indexReel; j++)
-                this.reels[j].symbols
-                    .forEach(e => {
-                        if (e.face === SymbolType.SCRATCH)
-                            e.PlayIdleScratch();
-                    });
-            return
-
-
-        }
-    }
-
-    private async stopPhase2(index: number, grid: any[]) {
-        tween(this.cameraMain).to(1, { orthoHeight: this.otherHeight + 100 })
-            .call(async () => {
-
-            })
-            .start()
-
-        TextBoxGame.instant.playScratch()
-        let current = index + 1;
-
-        while (current < this.reels.length) {
-            const reel = this.reels[current];
-            AudioManager.instance.ReelSLow()
-            reel.changeSpeed(0.1)
-            ListReel.instance.ShowMaskEffect()
-            this.ShowAllScratch(current)
-            reel.ShowAllSymbol()
-            ListReel.instance.ShowVfxLight(current)
-            await GameManager.waitForSeconds(this.GetTimeTurboScratchSpin());
-            reel._delay = 0.02
-            reel.stopRoll(grid[current]);
-            ListReel.instance.HideVfxLight()
             await GameManager.waitForSeconds(1);
-            reel.HideSymbolDifScratch()
+            await this.restoreCameraAfterScratch();
 
-            current++;
+            ListReel.instance.HideMaskEffect();
+            await this.ClearData();
+        } catch (error) {
+            console.error('[GameManager] stopScratchPhase2 error:', error);
+            this.forceUnlockSpinAfterError();
         }
-
-        // Khi stop hết reel
-        // this.playAnimReelScratch(99);
-        this.scheduleOnce(() => {
-            this.ShowAllReef(true)
-            this.scheduleOnce(() => {
-                tween(this.cameraMain).to(0.5, { orthoHeight: this.otherHeight })
-                    .call(() => {
-                        ListReel.instance.HideMaskEffect()
-                        this.ClearData()
-                    })
-                    .start()
-            }, 1)
-
-        }, 0.4)
-
     }
 
-    async RollDataNormal(grid) {
-        for (let i = 0; i < this.reels.length; i++) {
-            let current = i;
-            await GameManager.waitForSeconds(i == 0 ? 0 : this.GetTimeTurboStopSpin());
-            this.reels[current].startRoll();
+    private playScratchIdleOnStoppedReels(lastReelIndex: number): void {
+        for (let i = 0; i <= lastReelIndex; i++) {
+            this.reels[i].symbols.forEach(symbol => {
+                if (symbol.face === SymbolType.SCRATCH) {
+                    symbol.PlayIdleScratch();
+                }
+            });
         }
-
-        // await GameManager.waitForSeconds(0.16);
-        await GameManager.waitForSeconds(this.GetTimeTurboStopSpin() * 7);
-
-
-        for (let i = 0; i < this.reels.length; i++) {
-            let current = i;
-            this.reels[current].stopRoll(grid[i]);
-            await GameManager.waitForSeconds(i == 0 ? 0 : this.GetTimeTurboStopSpin());
-        }
-        await GameManager.waitForSeconds(0.5);
-        this.ClearData()
-
-
     }
 
+    private zoomCameraForScratch(): void {
+        if (!this.cameraMain) return;
 
-    private resolveSymbolByPosition(c: number, r: number, expectedFace?: number) {
-        const byGrid = this.symBolArray[c][r] as Symbol;
+        tween(this.cameraMain)
+            .to(1, { orthoHeight: this.otherHeight + 100 })
+            .start();
+    }
 
+    private restoreCameraAfterScratch(): Promise<void> {
+        if (!this.cameraMain) return Promise.resolve();
+
+        return new Promise(resolve => {
+            tween(this.cameraMain)
+                .to(0.5, { orthoHeight: this.otherHeight })
+                .call(() => resolve())
+                .start();
+        });
+    }
+
+    private prepareSpinState(): void {
+        this.infSynbol?.hide();
+        MultiplierCarouselFinal.instance.resetCombo();
+
+        this.stepWinCurrent = 0;
+        this.UpdateStepWIn(0);
+        TextBoxGame.instant.playRandomText();
+        this.stepOld = 1;
+        Spin.instance.isSpin = true;
+    }
+
+    // ---------------------------------------------------------------------
+    // Win / cascade
+    // ---------------------------------------------------------------------
+
+    private async playWinCascade(round: RoundData): Promise<void> {
+        ListReel.instance.ShowMaskEffect();
+        ListReel.instance.maskEffect.active = true;
+
+        this.stepWinCurrent += Number(round.baseWin ?? round.win?.stepWin ?? 0);
+        this.UpdateStepWIn(this.stepWinCurrent);
+        this.removeWinDuplicateFlip(round);
+
+        AudioManager.instance.Win();
+        this.playFlipWinAnimation(round.flips);
+        await this.disposeWinSymbols(round);
+
+        this.stepOld = round.multiplier;
+        MultiplierCarouselFinal.instance.focusTo(round.multiplier);
+        TextBoxGame.instant.PlayStepWin(this.stepWinCurrent, this.stepOld);
+        ListReel.instance.HideMaskEffect();
+
+        if (round.flips.length > 0) {
+            this.FlipData();
+        }
+
+        this.playWinSymbolAnimation(round);
+        await this.dropCascadeSymbols(round);
+        await GameManager.waitForSeconds(1);
+    }
+
+    private hasWin(round: RoundData): boolean {
+        console.log(round)
+        const normalWin = round.win?.normal?.length ?? 0;
+        const wildWin = round.win?.wild?.length ?? 0;
+        return normalWin > 0 || wildWin > 0;
+    }
+
+    private playFlipWinAnimation(flips: GridPosition[]): void {
+        flips.forEach(flip => {
+            const symbol = this.resolveSymbolByPosition(flip.c, flip.r);
+            if (!symbol) return;
+
+            symbol.node.setSiblingIndex(100);
+            symbol.playiconAnimation(symbol.getNameWin(), false);
+        });
+    }
+
+    private async disposeWinSymbols(round: RoundData): Promise<void> {
+        const toClear = [
+            ...(round.clear?.normal ?? []),
+            ...(round.clear?.wild ?? []),
+        ];
+        const disposeTasks: Promise<void>[] = [];
+
+        for (const clearItem of toClear) {
+            const symbol = this.resolveSymbolByPosition(clearItem.c, clearItem.r, clearItem.i);
+            if (!symbol) continue;
+
+            await GameManager.waitForSeconds(0.07);
+            disposeTasks.push(symbol.Dispose());
+        }
+
+        await Promise.all(disposeTasks);
+    }
+
+    private playWinSymbolAnimation(round: RoundData): void {
+        const allWin = [
+            ...(round.win?.normal ?? []),
+            ...(round.win?.wild ?? []),
+        ];
+
+        allWin.forEach(position => {
+            const symbol = this.resolveSymbolByPosition(position.c, position.r, position.i);
+            if (symbol) {
+                symbol.AnimationWin();
+            }
+        });
+    }
+
+    private async dropCascadeSymbols(round: RoundData): Promise<void> {
+        const tasks: Promise<void>[] = [];
+
+        for (let i = 0; i < this.reels.length; i++) {
+            if (round.above[i]?.length > 0) {
+                tasks.push(this.reels[i].cascadeDrop(round.above[i]));
+            }
+        }
+
+        await Promise.all(tasks);
+    }
+
+    private resolveSymbolByPosition(c: number, r: number, expectedFace?: number): Symbol | null {
         const reel = this.reels[c];
-        const byRow = reel?.symbols?.find(s => s?.node?.isValid && s.row === r && s.node.active) as Symbol;
+        if (!reel) return null;
+
+        const byRow = reel.symbols?.find(symbol => {
+            if (!symbol?.node?.isValid || !symbol.node.active) return false;
+            if (symbol.row !== r) return false;
+            if (expectedFace !== undefined && symbol.face !== expectedFace) return false;
+
+            return true;
+        }) as Symbol;
+
         if (byRow) {
+            if (!this.symBolArray[c]) this.symBolArray[c] = [];
             this.symBolArray[c][r] = byRow;
             return byRow;
         }
 
-        return null;
+        return this.symBolArray[c]?.[r] ?? null;
     }
 
-    FlipData() {
-        let dataRound = this.sampleJson.rounds[this.indexCurrentReel].flips || [];
-        this.scheduleOnce(() => {
-            // SoundToggle.instance.PlayChangeSymbol()
+    private createBigWinQueue(onDone: () => void): Array<() => void> {
+        const queue: Array<() => void> = [];
+        const totalWin = this.stepWinCurrent;
+        const bet = this.betCurrent;
 
-        }, 0.7)
-        dataRound.forEach(e => {
-            const symbol = this.resolveSymbolByPosition(e.c, e.r);
-            if (!symbol) return;
-            symbol.FlipSymbol(e);
-        });
-    }
-    private balanceAfterBet: number | null = null;
-    private applyBalanceAfterSpinEnd() {
-        if (this.balanceAfterBet === null) {
-            return;
-        }
-
-        const finalBalance =
-            Number(this.balanceAfterBet) + Number(this.stepWinCurrent);
-
-        UserInfo.getInstance().updateBalance(finalBalance);
-
-        this.balanceAfterBet = null;
-    }
-    stepWinCurrent = 0
-    async ClearData() {
-        const r = this.sampleJson.rounds[this.indexCurrentReel];
-        if (r.win.normal.length > 0 || r.win.wild.length > 0) {
-            ListReel.instance.ShowMaskEffect()
-
-            // Waymanager.instance.animWay(r.win.ways)
-            ListReel.instance.maskEffect.active = true
-            this.stepWinCurrent += r.baseWin
-            this.UpdateStepWIn(this.stepWinCurrent)
-            this.removeWinDuplicateFlip(r)
-
-            let disposeCount = 0;
-            const disposeTasks: Promise<void>[] = [];
-            AudioManager.instance.Win()
-
-            const toClear = [...(r.clear?.normal || []), ...(r.clear?.wild || [])];
-
-            // 1. Play win animation for flipped symbols FIRST, so they run concurrently with dispose
-            if (r.flips && r.flips.length > 0) {
-                r.flips.forEach(e => {
-                    const symbol = this.resolveSymbolByPosition(e.c, e.r);
-                    if (symbol) {
-                        symbol.node.setSiblingIndex(100);
-                        symbol.playiconAnimation(symbol.getNameWin(), false);
-                    }
-                });
-            }
-
-            for (const e of toClear) {
-                const symbol = this.resolveSymbolByPosition(e.c, e.r, e.i);
-                if (!symbol) {
-                    continue;
-                }
-
-                // Tạo delay 0.05s giữa thời điểm bắt đầu Dispose
-                await GameManager.waitForSeconds(0.07);
-
-                // KHÔNG await ở đây.
-                // Dispose bắt đầu ngay, animation chạy song song với các symbol khác.
-                disposeTasks.push(symbol.Dispose());
-
-                disposeCount++;
-            }
-
-            // Chờ tất cả symbol destroy xong hoàn toàn rồi mới chạy bước tiếp theo
-            await Promise.all(disposeTasks);
-            // SoundToggle.instance.PlaySymbolWin()
-            this.stepOld = this.sampleJson.rounds[this.indexCurrentReel].multiplier
-            MultiplierCarouselFinal.instance.focusTo(this.sampleJson.rounds[this.indexCurrentReel].multiplier)
-            TextBoxGame.instant.PlayStepWin(this.stepWinCurrent, this.stepOld)
-            ListReel.instance.HideMaskEffect()
-
-            // 2. NGAY SAU KHI NỔ XONG, FLIP LẬP TỨC!
-            if (r.flips && r.flips.length > 0) {
-                this.FlipData();
-            }
-
-            // Chỉ gọi AnimationWin cho các symbol thực sự win
-            const allWin = [...(r.win?.normal || []), ...(r.win?.wild || [])];
-            allWin.forEach(pos => {
-                const symbol = this.resolveSymbolByPosition(pos.c, pos.r, pos.i);
-                if (symbol) {
-                    symbol.AnimationWin();
-                }
+        if (totalWin > 10 * bet) {
+            const step = totalWin < 15 * bet ? totalWin : 10 * bet;
+            queue.push(() => {
+                AudioManager.instance.PlayBigwin();
+                BigWin.instance.showBigWin(onDone, step);
             });
-
-            // Chờ tất cả reel cascade hoàn tất
-            const tasks: Promise<void>[] = [];
-
-            for (let i = 0; i < this.reels.length; i++) {
-                if (r.above[i] && r.above[i].length > 0) {
-                    tasks.push(this.reels[i].cascadeDrop(r.above[i]));
-                }
-            }
-
-            await Promise.all(tasks);
-            await GameManager.waitForSeconds(1);
         }
-        if (r.hasNext) {
-            this.indexCurrentReel++;
-            await this.ClearData(); // ⭐ cực quan trọng
+
+        if (totalWin > 15 * bet) {
+            const step = totalWin < 25 * bet ? totalWin : 10 * bet;
+            queue.push(() => {
+                AudioManager.instance.PlaySupperwin();
+                BigWin.instance.showSuperWin(onDone, step);
+            });
         }
-        else {
-            if (this.stepOld > 2) {
-            }
-            this.ShowBigWin();
+
+        if (totalWin > 25 * bet) {
+            queue.push(() => {
+                AudioManager.instance.PlayMegaWin();
+                BigWin.instance.showMegaWin(onDone, totalWin);
+            });
         }
+
+        return queue;
     }
 
+    private finishCurrentSpin(): void {
+        this.applyBalanceAfterSpinEnd();
 
-    ShowBigWin() {
-        const r = this.sampleJson.rounds[this.indexCurrentReel];
-        const next = () => {
-            this.applyBalanceAfterSpinEnd();
-
-            if (this.CheckScratch4() == true) {
-                this.indexCurrentReel = 0;
-                this.isFreeSpin = true;
-                let free = this.getFreeSpin(this.GetNumberScratch());
-                FreeSpines.instance.playAnimation(free);
-                FreeSpines.instance.UpdateFreeSpinLb(free);
-            }
-            else {
-                if (this.isFreeSpin == true) {
-                    this.indexCurrentReel = 0;
-                    this.PlayModeFreeSpin();
-                }
-                else {
-                    this.indexCurrentReel = 0;
-                    this.SetModeNormal();
-
-                    if (Spin.instance.isAuto == true) {
-                        Spin.instance.AutoSpinNext();
-                    }
-                    else {
-                        Spin.instance.isSpin = false;
-                    }
-                }
-            }
-        };
-        // danh sách animation cần chạy
-        const winQueue: Array<() => void> = [];
-        if (this.stepWinCurrent > 10 * this.betCurrent) {
-            let step = 0
-            if (this.stepWinCurrent < 15 * this.betCurrent) {
-                step = this.stepWinCurrent
-            }
-            else {
-                step = 10 * this.betCurrent
-            }
-            winQueue.push(() => {
-                AudioManager.instance.PlayBigwin()
-                BigWin.instance.showBigWin(runNext, step);
-            });
-        }
-        if (this.stepWinCurrent > 15 * this.betCurrent) {
-            let step = 0
-            if (this.stepWinCurrent < 25 * this.betCurrent) {
-                step = this.stepWinCurrent
-            }
-            else {
-                step = 10 * this.betCurrent
-            }
-            winQueue.push(() => {
-                AudioManager.instance.PlaySupperwin()
-                BigWin.instance.showSuperWin(runNext, step);
-            });
-        }
-        if (this.stepWinCurrent > 25 * this.betCurrent) {
-            winQueue.push(() => {
-                AudioManager.instance.PlayMegaWin()
-                BigWin.instance.showMegaWin(runNext, this.stepWinCurrent);
-            });
-        }
-        // nếu không có animation nào
-        if (winQueue.length === 0) {
-            next();
-            return;
-        }
-        let index = 0;
-        const runNext = () => {
-            if (index >= winQueue.length) {
-                next();
+        if (this.CheckScratch4()) {
+            if (this.hasFreeSpinData()) {
+                this.startFreeSpinFromScratch();
                 return;
             }
-            const fn = winQueue[index];
-            index++;
-            fn();
-        };
-        runNext();
-    }
 
-
-    CheckScratch() {
-        let indexScratch = 0
-        this.sampleJson.rounds[this.indexCurrentReel].grid.forEach(reels => {
-            reels.forEach(e => {
-                if (e.i == SymbolType.SCRATCH) {
-                    indexScratch++
-                }
-            })
-        })
-        return indexScratch >= 2
-    }
-
-    public CheckReelFull3Scratch() {
-        let indexScratch = 0
-        let grid = this.sampleJson.rounds[this.indexCurrentReel].grid
-        for (let i = 0; i < grid.length; i++) {
-            for (let j = 0; j < grid[i].length; j++) {
-                if (grid[i][j].i == SymbolType.SCRATCH) {
-                    indexScratch++
-                }
-            }
-            if (indexScratch >= 1) return i
-        }
-    }
-
-    public CheckScratch4() {
-        let indexScratch = 0
-        this.reels.forEach(e => {
-            e.symbols.forEach(s => {
-                if (s.face == SymbolType.SCRATCH) {
-                    indexScratch++;
-                }
-            })
-        })
-        if (indexScratch >= 3) return true;
-    }
-
-
-    public GetNumberScratch() {
-        let indexScratch = 0
-        this.reels.forEach(e => {
-            e.symbols.forEach(s => {
-                if (s.face == SymbolType.SCRATCH) {
-                    indexScratch++;
-                }
-            })
-        })
-        return indexScratch
-    }
-
-    public playAnimReelScratch(index) {
-        this.reels.forEach((e, i) => {
-            if (i == index) {
-                if (e.spinesEff)
-                    e.spinesEff.enabled = true
-            }
-            else {
-                if (e.spinesEff)
-                    e.spinesEff.enabled = false
-            }
-        })
-    }
-
-
-
-    ShowAllReef(iSpine = false) {
-        this.reels.forEach((e, i) => {
-            e.symbols.forEach(s => {
-                if (s.face == SymbolType.SCRATCH && iSpine == false) {
-                    s.playiconAnimation(s.getNameIdle(), true)
-                }
-            })
-        })
-    }
-
-    isShowSetting = false
-
-    isShowFooter = false
-
-    priceOffset = 2000
-    priceMax = 20000
-
-
-    static waitForSeconds(s: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, s * 1000));
-    }
-
-    GetTimeTurboStarSpin() {
-        if (this.turboMode == 0) return 0.75
-        if (this.turboMode == 1) return 0.25
-        if (this.turboMode == 2) return 0
-    }
-
-    GetTimeTurboScratchStart() {
-        if (this.turboMode == 0) return 0.2
-        if (this.turboMode == 1) return 0
-        if (this.turboMode == 2) return 0
-    }
-
-    GetTimeTurboStopSpin() {
-        if (this.turboMode == 0) return 0.1
-        if (this.turboMode == 1) {
-            // SoundToggle.instance.PlayScatchIdle()
-            return 0
-        }
-        if (this.turboMode == 2) {
-            // SoundToggle.instance.PlayScatchIdle()
-            return 0
-        }
-    }
-
-
-    GetTimeTurboScratchSpin() {
-        if (this.turboMode == 0) {
-            // SoundToggle.instance.PlayRollScatch()
-            return 3
-        }
-        if (this.turboMode == 1) {
-            return 0
-        }
-        if (this.turboMode == 2) {
-            return 0
+            console.warn('[GameManager] Có đủ scratch trên reel nhưng không có batchSpins. Bỏ qua free spin để tránh đơ game.');
         }
 
-    }
-
-
-    removeWinDuplicateFlip(round: any) {
-        if (!round?.win?.positions) return;
-
-        // chỉ loại trùng lặp trong chính win.positions (không loại theo flip)
-        const seen = new Set<string>();
-        round.win.positions = round.win.positions.filter(p => {
-            const key = `${p.c}_${p.r}`;
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-        });
-    }
-    isFreeSpin = false
-    indexCurrentFreeSpin = 0
-    totalFreeSpin = 0
-
-    getFreeSpin(scratch: number): number {
-        if (scratch < 3) return 0;
-        this.totalFreeSpin += 10 + (scratch - 3) * 2;
-        return this.totalFreeSpin
-    }
-    GetDataFreeSpin() {
-        if (this.indexCurrentFreeSpin >= this.dataFreespin.payload.batchSpins.length) {
-            return null
-        }
-        return this.dataFreespin.payload.batchSpins[this.indexCurrentFreeSpin]
-    }
-
-    PlayModeFreeSpin() {
-        let dataFree = this.GetDataFreeSpin()
-        if (dataFree == null) {
-            AudioManager.instance.PlayTotalWIn()
-
-            FreeSpines.instance.ShowTotalSpin(() => {
-                this.indexCurrentFreeSpin = 0
-                this.isFreeSpin = false
-                this.totalFreeSpin = 0
-                this.dataFreespin = null
-                Spin.instance.ActiveSpin()
-                this.SetModeNormal();
-                // SoundToggle.instance.playNormal()
-
-                if (Spin.instance.isAuto == true) {
-                    Spin.instance.AutoSpinNext()
-                }
-                else {
-                    Spin.instance.isSpin = false;
-                }
-            }, this.dataFreespin.payload.batchSummary.totalWin);
+        if (this.isFreeSpin) {
+            this.indexCurrentReel = 0;
+            this.PlayModeFreeSpin();
             return;
         }
-        this.SetModeFreeSpin()
-        this.indexCurrentFreeSpin++
-        this.totalFreeSpin--
-        this.isFreeSpin = true
-        TextBoxGame.instant.playRandomText()
-        this.stepOld = 1
-        Spin.instance.isSpin = true
-        // Waymanager.instance.resetWay()
-        this.sampleJson = dataFree
-        const grid = this.sampleJson.rounds[this.indexCurrentReel].grid;
-        FreeSpines.instance.UpdateFreeSpinLb(this.totalFreeSpin)
-        this.GenerateMap(grid);
+
+        this.finishNormalSpin();
     }
 
+    private finishNormalSpin(): void {
+        this.indexCurrentReel = 0;
+        this.SetModeNormal();
 
-    ShowAllScratch(index) {
-        this.reels.forEach((r, indexReel) => {
-            if (indexReel < index) {
-                r.symbols.forEach(e => {
-                    if (e.face == SymbolType.SCRATCH) {
-                        e.node.setSiblingIndex(99)
-                    }
-                })
+        if (Spin.instance.isAuto) {
+            Spin.instance.AutoSpinNext();
+            return;
+        }
+
+        Spin.instance.isSpin = false;
+    }
+
+    private startFreeSpinFromScratch(): void {
+        this.indexCurrentReel = 0;
+        this.isFreeSpin = true;
+
+        const freeSpinCount = this.getFreeSpin(this.GetNumberScratch());
+        FreeSpines.instance.playAnimation(freeSpinCount);
+        FreeSpines.instance.UpdateFreeSpinLb(freeSpinCount);
+    }
+
+    private finishFreeSpinMode(): void {
+        AudioManager.instance.PlayTotalWIn();
+
+        const totalWin = this.dataFreespin?.payload?.batchSummary?.totalWin ?? 0;
+        FreeSpines.instance.ShowTotalSpin(() => {
+            this.indexCurrentFreeSpin = 0;
+            this.indexCurrentReel = 0;
+            this.isFreeSpin = false;
+            this.totalFreeSpin = 0;
+            this.dataFreespin = null;
+
+            Spin.instance.ActiveSpin();
+            this.SetModeNormal();
+
+            if (Spin.instance.isAuto) {
+                Spin.instance.AutoSpinNext();
+                return;
             }
 
-        })
-    }
-    // change mode
-
-    @property(Sprite)
-    bgReels: Sprite = null
-
-
-    @property(SpriteFrame)
-    bgReelsSp1: SpriteFrame[] = []
-
-    @property(Node)
-    bgDown: Node = null
-
-    @property(Node)
-    bgUp: Node = null
-    @property(Node)
-    bgFreeSpin: Node = null
-
-    @property(Node)
-    walletNode: Node = null
-
-    @property(Node)
-    btnNode: Node = null
-
-    @property(Node)
-    uiFreewin: Node = null
-
-    @property(Node)
-    wayFree: Node = null
-
-
-
-    SetModeNormal() {
-        AudioManager.instance.PlaybgNormal()
-        this.bgReels.spriteFrame = this.bgReelsSp1[0]
-        this.bgDown.active = true
-        this.bgReels.node.setPosition(0, 117, 0)
-        this.bgFreeSpin.active = false
-        this.walletNode.setPosition(21.22, -354)
-        this.btnNode.active = true
-        this.bgUp.active = true
-        this.wayFree.active = false
-        this.uiFreewin.active = false
+            Spin.instance.isSpin = false;
+        }, totalWin);
     }
 
+    private applyBalanceAfterSpinEnd(): void {
+        if (this.balanceAfterBet === null) return;
 
-    SetModeFreeSpin() {
-        AudioManager.instance.PlaybgFree()
+        const finalBalance = Number(this.balanceAfterBet) + Number(this.stepWinCurrent);
+        UserInfo.getInstance().updateBalance(finalBalance);
+        this.balanceAfterBet = null;
+    }
 
-        this.bgReels.spriteFrame = this.bgReelsSp1[1]
-        this.bgDown.active = false
-        this.bgReels.node.setPosition(0, 41, 0)
-        this.bgFreeSpin.active = true
-        this.walletNode.setPosition(21.22, -596.327)
-        this.btnNode.active = false
-        this.bgUp.active = false
-        this.wayFree.active = true
-        this.uiFreewin.active = true
+    // ---------------------------------------------------------------------
+    // Scratch helper
+    // ---------------------------------------------------------------------
+
+    private countScratchInGrid(grid: any[][]): number {
+        if (!Array.isArray(grid)) return 0;
+
+        let count = 0;
+
+        grid.forEach(column => {
+            if (!Array.isArray(column)) return;
+
+            column.forEach(cell => {
+                if (Number(cell?.i) === SymbolType.SCRATCH) {
+                    count++;
+                }
+            });
+        });
+
+        return count;
+    }
+
+    // ---------------------------------------------------------------------
+    // Turbo timing
+    // ---------------------------------------------------------------------
+
+    public GetTimeTurboStarSpin(): number {
+        if (this.turboMode === 0) return 0.75;
+        if (this.turboMode === 1) return 0.25;
+        return 0;
+    }
+
+    public GetTimeTurboScratchStart(): number {
+        if (this.turboMode === 0) return 0.2;
+        return 0;
+    }
+
+    public GetTimeTurboStopSpin(): number {
+        if (this.turboMode === 0) return 0.1;
+        return 0;
+    }
+
+    public GetTimeTurboScratchSpin(): number {
+        if (this.turboMode === 0) return 3;
+        return 0;
+    }
+
+    public static waitForSeconds(seconds: number): Promise<void> {
+        const tempObj = { value: 0 };
+
+        return new Promise(resolve => {
+            tween(tempObj)
+                .delay(seconds)
+                .call(() => resolve())
+                .start();
+        });
     }
 }
-
