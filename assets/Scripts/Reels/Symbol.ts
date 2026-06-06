@@ -324,6 +324,7 @@ export class Symbol extends Component {
         );
     }
     FlipSymbol(data) {
+        this.frame.node.active = false
         this.AnimationWin()
         this.isInit = true;
         this.face = 0;

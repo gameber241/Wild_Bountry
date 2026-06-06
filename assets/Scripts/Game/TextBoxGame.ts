@@ -211,7 +211,7 @@ export class TextBoxGame extends Component {
 
         this.textRandom.node.active = true;
         this.textRandom.spriteFrame = this.textScratch;
-        this.textRandom.node.setPosition(0, 30, 0);
+        this.textRandom.node.setPosition(0, 0, 0);
     }
 
     // =====================================================
